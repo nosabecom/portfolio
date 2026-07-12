@@ -9,7 +9,7 @@
           "value": "t3.nosa.dev"
         }
       ],
-      "destination": "https://msi.tail3123d8.ts.net/",
+      "destination": "https://nosa.tail3123d8.ts.net/",
       "permanent": false
     },
     {
@@ -20,7 +20,7 @@
           "value": "t3.nosa.dev"
         }
       ],
-      "destination": "https://msi.tail3123d8.ts.net/:path*",
+      "destination": "https://nosa.tail3123d8.ts.net/:path*",
       "permanent": false
     },
     {
