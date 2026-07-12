@@ -1,10 +1,21 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "redirects":[
+  "redirects": [
     {
-        "source": "/secretkey",
-        "destination": "https://dustebin.com/qhg3EOXJ.css",
-        "permanent": false
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "t3.nosa.dev"
+        }
+      ],
+      "destination": "https://msi.tail3123d8.ts.net/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/secretkey",
+      "destination": "https://dustebin.com/qhg3EOXJ.css",
+      "permanent": false
     }
   ]
 }
