@@ -2,6 +2,17 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "t3.nosa.dev"
+        }
+      ],
+      "destination": "https://msi.tail3123d8.ts.net/",
+      "permanent": false
+    },
+    {
       "source": "/:path*",
       "has": [
         {
