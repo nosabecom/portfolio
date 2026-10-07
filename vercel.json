@@ -27,6 +27,11 @@
       "source": "/secretkey",
       "destination": "https://dustebin.com/qhg3EOXJ.css",
       "permanent": false
+    },
+    {
+      "source": "/attend",
+      "destination": "https://attendance-tracker-gamma-orpin.vercel.app/",
+      "permanent": false
     }
   ]
 }
