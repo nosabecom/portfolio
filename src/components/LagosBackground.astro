@@ -1,0 +1,184 @@
+---
+import { projectCoordinate } from '../lib/lagos-geography';
+
+const places = [
+  { name: 'MAINLAND', longitude: 3.297, latitude: 6.56, kind: 'land' },
+  { name: 'LAGOS LAGOON', longitude: 3.487, latitude: 6.53, kind: 'water' },
+  { name: 'LAGOS ISLAND', longitude: 3.396, latitude: 6.456, kind: 'land' },
+  { name: 'IKOYI', longitude: 3.438, latitude: 6.467, kind: 'land' },
+  { name: 'VICTORIA ISLAND', longitude: 3.426, latitude: 6.425, kind: 'land' },
+  { name: 'LEKKI', longitude: 3.568, latitude: 6.448, kind: 'land' },
+  { name: 'ATLANTIC OCEAN', longitude: 3.51, latitude: 6.375, kind: 'water' },
+];
+---
+
+<lagos-background data-theme="dark">
+  <canvas class="terrain" aria-hidden="true"></canvas>
+  <div class="interaction-surface" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="Nosa home">nosa<span>.</span></a>
+    <div class="header-right">
+      <span class="work-status"><span class="status-dot"></span> A WORK IN PROGRESS</span>
+      <a class="github-link" href="https://github.com/nosabecom/" target="_blank" rel="noopener noreferrer" aria-label="GitHub (opens in a new tab)">GitHub <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <h1 class="sr-only">Lagos, in little shapes</h1>
+    <p class="sr-only">An interactive interpretation of Lagos, Nigeria. Geometric shapes follow the coastline. Move your pointer to leave a fading trail. Hold and drag to stir the shapes, then release to send a pulse. Use the pulse button with a keyboard. Trails and motion can be switched off.</p>
+    <div class="map-labels" aria-hidden="true">
+      {places.map((place) => {
+        const [x, y] = projectCoordinate(place.longitude, place.latitude);
+        return <span class:list={['place-label', place.kind]} style={`--x:${x};--y:${y}`}><i></i>{place.name}</span>;
+      })}
+    </div>
+    <div class="map-margin" aria-hidden="true">
+      <span class="map-index">EXPLORATION <span>001 / LAGOS</span></span>
+      <span class="north"><span>N</span><svg viewBox="0 0 16 32" fill="none"><path d="M8 29V4M3 10l5-6 5 6" stroke="currentColor" stroke-width="1"/></svg></span>
+    </div>
+    <div class="live-readout" aria-hidden="true"><span>A GENERATIVE ATLAS</span><span class="live-coordinates">6.5244° N / 3.3792° E</span></div>
+    <div class="location-caption">
+      <span class="eyebrow"><i></i> A CITY IN LITTLE SHAPES</span>
+      <p>Lagos<span class="location-period">.</span></p>
+      <span class="caption-subtitle">Always in motion. Yours to explore.</span>
+      <span class="coordinates">NIGERIA <span>—</span> 6.5244° N, 3.3792° E</span>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="interaction-hint"><span class="hint-symbols" aria-hidden="true">+ &nbsp; △ &nbsp; ×</span><span class="pointer-hint"><b>Move</b> to trace. <b>Hold + drag</b> to stir.</span><span class="touch-hint"><b>Drag</b> to trace. <b>Tap</b> to pulse.</span><noscript>Enable JavaScript to explore.</noscript></div>
+    <div class="controls" role="group" aria-label="Background controls">
+      <button type="button" class="trail-button" aria-pressed="true" aria-label="Pointer trails" title="Toggle pointer trails"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 15c2-8 5 1 8-6s6-6 6-6"/><circle cx="3" cy="15" r="1.3"/><circle cx="17" cy="3" r="1.3"/></svg><span>Trails</span></button>
+      <button type="button" class="ripple-button" aria-label="Send a pulse" title="Send a pulse"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="2"/><circle cx="10" cy="10" r="6"/></svg><span>Pulse</span></button>
+      <button type="button" class="motion-button" aria-pressed="false" aria-label="Pause motion" title="Pause motion"><svg class="pause-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg><svg class="play-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m5 3 8 5-8 5Z"/></svg><span class="motion-text">Pause</span></button>
+      <span class="control-divider" aria-hidden="true"></span>
+      <button type="button" class="icon-button theme-button" aria-label="Switch to light theme" title="Switch to light theme"><svg class="moon-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16.8 11.6A7 7 0 0 1 8.4 3.2a7 7 0 1 0 8.4 8.4Z"/></svg><svg class="sun-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="3.3"/><path d="M10 1v2m0 14v2M1 10h2m14 0h2M3.6 3.6 5 5m10 10 1.4 1.4M3.6 16.4 5 15M15 5l1.4-1.4"/></svg></button>
+    </div>
+  </footer>
+  <a class="map-credit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data © OpenStreetMap contributors</a>
+</lagos-background>
+
+<script>
+  import { mountLagosField } from '../lib/lagos-field';
+
+  class LagosBackground extends HTMLElement {
+    private cleanup?: () => void;
+    connectedCallback() {
+      this.cleanup ??= mountLagosField(this);
+    }
+    disconnectedCallback() {
+      this.cleanup?.();
+      this.cleanup = undefined;
+    }
+  }
+
+  if (!customElements.get('lagos-background')) customElements.define('lagos-background', LagosBackground);
+</script>
+
+<style>
+  lagos-background {
+    --paper: #f2f0e6;
+    --ink: #233f33;
+    --muted: #586c60;
+    --accent: #557a24;
+    --line: #233f3326;
+    --panel: #edece2;
+    position: relative;
+    display: block;
+    isolation: isolate;
+    width: 100%;
+    min-height: 600px;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  lagos-background[data-theme='dark'] { --paper: #101816; --ink: #eef2df; --muted: #9eb0a2; --accent: #b9ef87; --line: #b6d0b52e; --panel: #18231e; color-scheme: dark; }
+  .terrain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .interaction-surface { position: absolute; inset: 90px 0 145px; touch-action: none; cursor: crosshair; }
+  [data-drawing='true'] .interaction-surface { cursor: grabbing; }
+  .site-header, .site-footer, .map-margin, .location-caption, .map-credit, .live-readout { position: absolute; z-index: 2; }
+  .site-header { top: 32px; left: 44px; right: 44px; display: flex; align-items: center; justify-content: space-between; }
+  a { color: inherit; text-decoration: none; }
+  a, button { touch-action: manipulation; }
+  .wordmark { font-size: 34px; font-weight: 700; letter-spacing: -2px; line-height: 1; }
+  .wordmark span { color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 36px; }
+  .work-status, .eyebrow, .coordinates, .place-label, .map-index, .north, .interaction-hint, .controls, .map-credit, .live-readout { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; }
+  .work-status { display: flex; align-items: center; gap: 8px; font-size: 9px; letter-spacing: 1px; color: var(--muted); }
+  .status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  .github-link { font-size: 12px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 24px; }
+  .github-link span { margin-left: 8px; }
+  .github-link:hover { color: var(--accent); }
+  .map-labels { position: absolute; left: var(--map-left, 0px); top: var(--map-top, 0px); width: var(--map-width, 100%); height: var(--map-height, 100%); pointer-events: none; }
+  .place-label { position: absolute; left: calc(var(--x) * 100%); top: calc(var(--y) * 100%); transform: translate(-50%, -50%); display: flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 9px; letter-spacing: 1.4px; color: var(--ink); text-shadow: 0 0 5px var(--paper), 0 0 8px var(--paper), 0 0 8px var(--paper), 0 0 12px var(--paper); }
+  .place-label i { width: 4px; height: 4px; border: 1px solid var(--accent); border-radius: 50%; box-shadow: 0 0 0 3px var(--paper); }
+  .place-label.water { font-size: 10px; letter-spacing: 3px; color: var(--muted); }
+  .place-label.water i { display: none; }
+  .map-margin { top: 110px; left: 44px; right: 44px; display: flex; align-items: flex-start; justify-content: space-between; pointer-events: none; }
+  .map-index { display: flex; flex-direction: column; gap: 8px; font-size: 8px; letter-spacing: 1.5px; color: var(--muted); }
+  .map-index span { color: var(--ink); }
+  .north { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 66px; font-size: 10px; color: var(--accent); }
+  .north svg { width: 16px; height: 32px; }
+  .live-readout { top: 110px; right: 44px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; font-size: 8px; letter-spacing: 1.4px; color: var(--muted); pointer-events: none; }
+  .live-coordinates { color: var(--ink); letter-spacing: .6px; font-variant-numeric: tabular-nums; }
+  .location-caption { bottom: 135px; left: 44px; pointer-events: none; }
+  .eyebrow { display: flex; align-items: center; gap: 10px; font-size: 9px; letter-spacing: 1.8px; color: var(--accent); }
+  .eyebrow i { width: 18px; height: 1px; background: currentColor; }
+  .location-caption p { margin: 17px 0 10px; font-size: clamp(62px, 6.8vw, 100px); line-height: 1; letter-spacing: -5px; font-weight: 400; }
+  .location-period { color: var(--accent); }
+  .caption-subtitle { display: block; font-size: 13px; line-height: 1.6; color: var(--muted); }
+  .coordinates { display: block; margin-top: 24px; font-size: 8px; letter-spacing: 1px; color: var(--muted); }
+  .coordinates span { padding: 0 8px; color: var(--accent); }
+  .site-footer { left: 44px; right: 44px; bottom: 35px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .interaction-hint { display: flex; gap: 18px; align-items: center; font-size: 9px; color: var(--muted); }
+  .interaction-hint b { font-weight: 400; color: var(--ink); }
+  .hint-symbols { color: var(--accent); font-size: 16px; }
+  .touch-hint { display: none; }
+  .controls { display: flex; align-items: center; gap: 2px; padding: 5px; background: var(--panel); border: 1px solid var(--line); border-radius: 11px; }
+  button { display: flex; align-items: center; justify-content: center; gap: 7px; height: 34px; padding: 0 9px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; font: inherit; font-size: 10px; }
+  .trail-button[aria-pressed='true'] { color: var(--accent); background: var(--line); }
+  button:hover { background: var(--line); }
+  button:disabled { opacity: .45; cursor: default; background: transparent; }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  button svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.2; }
+  .icon-button { width: 36px; }
+  .motion-button { padding: 0 9px; gap: 7px; min-width: 73px; }
+  .control-divider { height: 14px; width: 1px; margin: 0 5px; background: var(--line); }
+  .play-icon, .sun-icon { display: none; }
+  [data-paused='true'] .pause-icon, [data-theme='dark'] .moon-icon { display: none; }
+  [data-paused='true'] .play-icon, [data-theme='dark'] .sun-icon { display: block; }
+  .map-credit { bottom: 13px; right: 44px; font-size: 8px; color: var(--muted); }
+  .map-credit:hover { text-decoration: underline; }
+  @media (pointer: coarse) { .pointer-hint { display: none; } .touch-hint { display: inline; } button { height: 44px; } .icon-button { width: 44px; } }
+  @media (max-width: 600px) {
+    lagos-background { min-height: 560px; }
+    .site-header { top: 25px; left: 24px; right: 24px; }
+    .wordmark { font-size: 32px; }
+    .header-right { gap: 20px; }
+    .work-status { font-size: 7px; letter-spacing: .6px; }
+    .github-link { font-size: 11px; }
+    .map-margin { top: 100px; left: 24px; right: 24px; }
+    .map-index { font-size: 7px; }
+    .north { margin-top: 42px; }
+    .live-readout { top: 100px; right: 24px; font-size: 7px; }
+    .live-readout > span:first-child { display: none; }
+    .location-caption { left: 24px; bottom: 162px; }
+    .location-caption p { font-size: 66px; margin: 13px 0 9px; letter-spacing: -4px; }
+    .eyebrow { font-size: 7px; letter-spacing: 1.4px; }
+    .caption-subtitle { font-size: 11px; }
+    .coordinates { margin-top: 15px; font-size: 7px; letter-spacing: .5px; }
+    .place-label { font-size: 7px; letter-spacing: .5px; gap: 4px; }
+    .place-label.water { font-size: 8px; letter-spacing: 1.3px; }
+    .site-footer { left: 24px; right: 24px; bottom: 30px; flex-wrap: wrap; row-gap: 16px; }
+    .interaction-hint { flex-basis: 100%; font-size: 8px; gap: 12px; }
+    .controls { margin-left: -5px; }
+    .map-credit { right: 24px; bottom: 12px; font-size: 7px; }
+  }
+  @media (max-width: 420px) { .work-status { display: none; } }
+  @media (max-height: 700px) and (max-width: 600px) { .location-caption { bottom: 157px; } .location-caption p { font-size: 48px; } .coordinates { display: none; } }
+  @media (max-height: 620px) and (min-width: 601px) { .location-caption { bottom: 110px; } .map-margin, .live-readout { top: 90px; } }
+</style>
