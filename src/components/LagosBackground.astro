@@ -81,7 +81,7 @@ const places = [
   .interaction-surface { position: absolute; inset: 90px 0 40px; touch-action: none; cursor: crosshair; }
   [data-drawing='true'] .interaction-surface { cursor: grabbing; }
   .profile, .north, .map-credit, .live-readout, .theme-button { position: absolute; z-index: 2; }
-  [data-theme='dark'] .terrain { opacity: .72; }
+  [data-theme='dark'] .terrain { opacity: .42; }
   .profile { top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 25px; width: max-content; max-width: calc(100% - 48px); text-align: center; }
   .profile::before { content: ''; position: absolute; z-index: -1; inset: -90px -110px; background: radial-gradient(ellipse, var(--paper) 15%, transparent 70%); pointer-events: none; }
   .profile-image { width: 156px; height: 156px; border-radius: 50%; object-fit: cover; border: 1px solid #b792f64d; box-shadow: 0 12px 48px #0003; -webkit-user-drag: none; }
@@ -101,9 +101,9 @@ const places = [
   .north svg { width: 16px; height: 32px; }
   .live-readout { bottom: 43px; left: 44px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; font-size: 8px; letter-spacing: 1.4px; color: var(--muted); pointer-events: none; }
   .live-coordinates { color: var(--muted); letter-spacing: .6px; font-variant-numeric: tabular-nums; }
-  .theme-button { right: 44px; bottom: 30px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: var(--panel); cursor: pointer; }
-  .theme-button:hover { color: var(--accent); border-color: currentColor; }
-  .theme-button svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.2; }
+  .theme-button { right: 22px; bottom: 24px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; color: var(--muted); background: transparent; cursor: pointer; }
+  .theme-button:hover svg, .theme-button:focus-visible svg { opacity: 1; }
+  .theme-button svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 1.2; opacity: .6; }
   .sun-icon, [data-theme='dark'] .moon-icon { display: none; }
   [data-theme='dark'] .sun-icon { display: block; }
   .map-credit { bottom: 13px; right: 44px; font-size: 8px; color: var(--muted); }
@@ -114,7 +114,7 @@ const places = [
     .profile-image { width: 128px; height: 128px; }
     .wordmark { font-size: clamp(30px, 8vw, 38px); letter-spacing: -1.6px; }
     .north { top: 100px; right: 24px; }
-    .theme-button { right: 24px; }
+    .theme-button { right: 12px; }
     .live-readout { left: 24px; font-size: 7px; }
     .place-label { font-size: 7px; letter-spacing: .5px; gap: 4px; }
     .place-label.water { font-size: 7px; letter-spacing: 1.3px; }
