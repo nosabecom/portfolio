@@ -138,10 +138,9 @@ export function mountLagosField(root: HTMLElement): () => void {
       const random = hash(col, row), wet = !!water[index];
       const edge = Math.min(clamp(u * 16), clamp((1 - u) * 16), clamp(v * 16), clamp((1 - v) * 16));
       const frame = clamp((y - 60) / 70) * clamp((height - y - 65) / 85);
-      const caption = 1 - .94 * Math.exp(-((x - 115) ** 2 / (mobile ? 32000 : 52000) + (y - (height - 205)) ** 2 / 12500));
       points[index] = {
         x, y, size: (wet ? 1.4 : 1.65 + band * 1.05 + shore * .8) * (mobile ? .84 : 1),
-        alpha: (wet ? .2 + random * .1 : .36 + band * .46 + shore * .25) * edge * frame * caption,
+        alpha: (wet ? .2 + random * .1 : .36 + band * .46 + shore * .25) * edge * frame,
         shape: wet ? 3 : (Math.floor(h * 18) + (random > .93 ? 1 : 0)) % 3,
         palette: wet ? 2 : shore > .24 ? 1 : 0,
         ox: 0, oy: 0, vx: 0, vy: 0, angle: 0, spin: 0, energy: 0,

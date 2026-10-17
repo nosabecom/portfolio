@@ -34,12 +34,6 @@ const places = [
       <span class="north"><span>N</span><svg viewBox="0 0 16 32" fill="none"><path d="M8 29V4M3 10l5-6 5 6" stroke="currentColor" stroke-width="1"/></svg></span>
     </div>
     <div class="live-readout" aria-hidden="true"><span>A GENERATIVE ATLAS</span><span class="live-coordinates">6.5244° N / 3.3792° E</span></div>
-    <div class="location-caption">
-      <span class="eyebrow"><i></i> A CITY IN LITTLE SHAPES</span>
-      <p>Lagos<span class="location-period">.</span></p>
-      <span class="caption-subtitle">Always in motion. Yours to explore.</span>
-      <span class="coordinates">NIGERIA <span>—</span> 6.5244° N, 3.3792° E</span>
-    </div>
   </main>
 
   <a class="map-credit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data © OpenStreetMap contributors</a>
@@ -86,14 +80,14 @@ const places = [
   .terrain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   .interaction-surface { position: absolute; inset: 90px 0 40px; touch-action: none; cursor: crosshair; }
   [data-drawing='true'] .interaction-surface { cursor: grabbing; }
-  .site-header, .map-margin, .location-caption, .map-credit, .live-readout { position: absolute; z-index: 2; }
+  .site-header, .map-margin, .map-credit, .live-readout { position: absolute; z-index: 2; }
   .site-header { top: 32px; left: 44px; right: 44px; display: flex; align-items: center; justify-content: space-between; }
   a { color: inherit; text-decoration: none; }
   a { touch-action: manipulation; }
   a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   .wordmark { font-size: 34px; font-weight: 700; letter-spacing: -2px; line-height: 1; }
   .wordmark span { color: var(--accent); }
-  .eyebrow, .coordinates, .place-label, .map-index, .north, .map-credit, .live-readout { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; }
+  .place-label, .map-index, .north, .map-credit, .live-readout { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; }
   .map-labels { position: absolute; left: var(--map-left, 0px); top: var(--map-top, 0px); width: var(--map-width, 100%); height: var(--map-height, 100%); pointer-events: none; }
   .place-label { position: absolute; left: calc(var(--x) * 100%); top: calc(var(--y) * 100%); transform: translate(-50%, -50%); display: flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 8px; letter-spacing: 1px; color: var(--muted); opacity: .3; text-shadow: 0 0 5px var(--paper); }
   .place-label i { width: 3px; height: 3px; border: 1px solid currentColor; border-radius: 50%; }
@@ -106,14 +100,6 @@ const places = [
   .north svg { width: 16px; height: 32px; }
   .live-readout { top: 110px; right: 44px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; font-size: 8px; letter-spacing: 1.4px; color: var(--muted); pointer-events: none; }
   .live-coordinates { color: var(--ink); letter-spacing: .6px; font-variant-numeric: tabular-nums; }
-  .location-caption { bottom: 135px; left: 44px; pointer-events: none; }
-  .eyebrow { display: flex; align-items: center; gap: 10px; font-size: 9px; letter-spacing: 1.8px; color: var(--accent); }
-  .eyebrow i { width: 18px; height: 1px; background: currentColor; }
-  .location-caption p { margin: 17px 0 10px; font-size: clamp(62px, 6.8vw, 100px); line-height: 1; letter-spacing: -5px; font-weight: 400; }
-  .location-period { color: var(--accent); }
-  .caption-subtitle { display: block; font-size: 13px; line-height: 1.6; color: var(--muted); }
-  .coordinates { display: block; margin-top: 24px; font-size: 8px; letter-spacing: 1px; color: var(--muted); }
-  .coordinates span { padding: 0 8px; color: var(--accent); }
   .map-credit { bottom: 13px; right: 44px; font-size: 8px; color: var(--muted); }
   .map-credit:hover { text-decoration: underline; }
   @media (max-width: 600px) {
@@ -125,15 +111,9 @@ const places = [
     .north { margin-top: 42px; }
     .live-readout { top: 100px; right: 24px; font-size: 7px; }
     .live-readout > span:first-child { display: none; }
-    .location-caption { left: 24px; bottom: 162px; }
-    .location-caption p { font-size: 66px; margin: 13px 0 9px; letter-spacing: -4px; }
-    .eyebrow { font-size: 7px; letter-spacing: 1.4px; }
-    .caption-subtitle { font-size: 11px; }
-    .coordinates { margin-top: 15px; font-size: 7px; letter-spacing: .5px; }
     .place-label { font-size: 7px; letter-spacing: .5px; gap: 4px; }
     .place-label.water { font-size: 7px; letter-spacing: 1.3px; }
     .map-credit { right: 24px; bottom: 12px; font-size: 7px; }
   }
-  @media (max-height: 700px) and (max-width: 600px) { .location-caption { bottom: 157px; } .location-caption p { font-size: 48px; } .coordinates { display: none; } }
-  @media (max-height: 620px) and (min-width: 601px) { .location-caption { bottom: 110px; } .map-margin, .live-readout { top: 90px; } }
+  @media (max-height: 620px) and (min-width: 601px) { .map-margin, .live-readout { top: 90px; } }
 </style>
