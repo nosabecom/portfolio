@@ -48,7 +48,7 @@ export function mountLagosField(root: HTMLElement): () => void {
   let palette: string[] = [], paper = '';
 
   function setPalette() {
-    paper = dark ? '#101816' : '#f2f0e6';
+    paper = dark ? '#0b1110' : '#f2f0e6';
     palette = dark
       ? ['#a7c6af', '#deedc9', '#648f88', '#b9f581', '#f2e5b7']
       : ['#38594c', '#247e6c', '#789791', '#638d21', '#a86527'];

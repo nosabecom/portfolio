@@ -16,12 +16,11 @@ const places = [
   <canvas class="terrain" aria-hidden="true"></canvas>
   <div class="interaction-surface" aria-hidden="true"></div>
 
-  <header class="site-header">
-    <a class="wordmark" href="/" aria-label="Nosa Omokaro home" draggable="false">Nosa Omokaro<span>.</span></a>
-  </header>
-
   <main id="main-content">
-    <h1 class="sr-only">Lagos, in little shapes</h1>
+    <div class="profile" data-no-terrain>
+      <img class="profile-image" src="/profile.webp" alt="Nosa Omokaro’s purple profile avatar" width="1440" height="1440" draggable="false" fetchpriority="high" />
+      <h1 class="wordmark">Nosa Omokaro<span>.</span></h1>
+    </div>
     <p class="sr-only">An interactive interpretation of Lagos, Nigeria. Geometric shapes follow the coastline. Move your pointer to leave a fading trail. Hold and drag to stir the shapes, then release to send a pulse. Motion follows your device’s reduced-motion preference.</p>
     <div class="map-labels" aria-hidden="true">
       {places.map((place) => {
@@ -77,17 +76,20 @@ const places = [
     font-family: Arial, Helvetica, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
-  lagos-background[data-theme='dark'] { --paper: #101816; --ink: #eef2df; --muted: #9eb0a2; --accent: #b9ef87; --line: #b6d0b52e; --panel: #18231e; color-scheme: dark; }
+  lagos-background[data-theme='dark'] { --paper: #0b1110; --ink: #eef2df; --muted: #9eb0a2; --accent: #b9ef87; --line: #b6d0b52e; --panel: #141d19; color-scheme: dark; }
   .terrain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   .interaction-surface { position: absolute; inset: 90px 0 40px; touch-action: none; cursor: crosshair; }
   [data-drawing='true'] .interaction-surface { cursor: grabbing; }
-  .site-header, .north, .map-credit, .live-readout, .theme-button { position: absolute; z-index: 2; }
-  .site-header { top: 32px; left: 44px; right: 44px; display: flex; align-items: center; justify-content: space-between; }
+  .profile, .north, .map-credit, .live-readout, .theme-button { position: absolute; z-index: 2; }
+  [data-theme='dark'] .terrain { opacity: .72; }
+  .profile { top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 25px; width: max-content; max-width: calc(100% - 48px); text-align: center; }
+  .profile::before { content: ''; position: absolute; z-index: -1; inset: -90px -110px; background: radial-gradient(ellipse, var(--paper) 15%, transparent 70%); pointer-events: none; }
+  .profile-image { width: 156px; height: 156px; border-radius: 50%; object-fit: cover; border: 1px solid #b792f64d; box-shadow: 0 12px 48px #0003; -webkit-user-drag: none; }
   a { color: inherit; text-decoration: none; }
   a, button { touch-action: manipulation; }
-  .site-header, .interaction-surface, .map-labels, .north, .live-readout, .theme-button, .map-credit { -webkit-user-select: none; user-select: none; }
+  .profile, .interaction-surface, .map-labels, .north, .live-readout, .theme-button, .map-credit { -webkit-user-select: none; user-select: none; }
   button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-  .wordmark { font-size: 34px; font-weight: 700; letter-spacing: -2px; line-height: 1; }
+  .wordmark { margin: 0; font-size: clamp(36px, 4.5vw, 56px); font-weight: 700; letter-spacing: -2.5px; line-height: 1.1; }
   .wordmark span { color: var(--accent); }
   .place-label, .north, .map-credit, .live-readout { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; }
   .map-labels { position: absolute; left: var(--map-left, 0px); top: var(--map-top, 0px); width: var(--map-width, 100%); height: var(--map-height, 100%); pointer-events: none; }
@@ -108,8 +110,9 @@ const places = [
   .map-credit:hover { text-decoration: underline; }
   @media (max-width: 600px) {
     lagos-background { min-height: 560px; }
-    .site-header { top: 25px; left: 24px; right: 24px; }
-    .wordmark { font-size: clamp(26px, 6.5vw, 32px); letter-spacing: -1.5px; }
+    .profile { gap: 22px; }
+    .profile-image { width: 128px; height: 128px; }
+    .wordmark { font-size: clamp(30px, 8vw, 38px); letter-spacing: -1.6px; }
     .north { top: 100px; right: 24px; }
     .theme-button { right: 24px; }
     .live-readout { left: 24px; font-size: 7px; }
