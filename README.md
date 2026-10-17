@@ -11,7 +11,7 @@ the static site in `dist/`; `bun run preview` serves that build locally.
 
 ## Background
 
-- `src/components/LagosBackground.astro`: page framing, map labels, and accessible controls.
+- `src/components/LagosBackground.astro`: page framing and subtle geographic labels.
 - `src/lib/lagos-field.ts`: batched vector glyphs, procedural relief, shoreline emphasis,
   spring-driven pointer wakes, fading traces, and click/tap pulses. The canvas ignores pointer events, so foreground links and
   controls remain usable. Add `data-no-terrain` to other foreground interaction areas.
@@ -24,12 +24,11 @@ external font, or runtime network request is required for the background.
 
 Move to leave a fine trail; hold and drag for a wider brush with stronger motion.
 Release to send out a pulse. Touch drawing is confined to the map surface, leaving
-the surrounding page available for scrolling. Trails can be switched off separately.
+the surrounding page available for scrolling.
 
-The pulse button supports keyboard interaction. Motion can be paused, respects
-the device's reduced-motion preference, and suspends while the page is hidden.
+Motion respects the device's reduced-motion preference and suspends while the page is hidden.
 The resting field is cached. A spatial grid limits interaction queries, and only
 changed canvas tiles are restored. Vector paths are grouped by color and opacity;
 frames stop when the bounded particles and pulses settle. No animation framework
 or runtime dependency is needed.
-The theme control switches between dark green and paper palettes.
+Set the background’s `data-theme` to `dark` or `light` before mounting to choose the palette.

@@ -31,11 +31,6 @@ export function mountLagosField(root: HTMLElement): () => void {
   const context = canvas.getContext('2d', { alpha: false, desynchronized: true });
   if (!context) return () => {};
   const ctx = context;
-  const motionButton = root.querySelector<HTMLButtonElement>('.motion-button')!;
-  const motionText = root.querySelector<HTMLElement>('.motion-text')!;
-  const themeButton = root.querySelector<HTMLButtonElement>('.theme-button')!;
-  const pulseButton = root.querySelector<HTMLButtonElement>('.ripple-button')!;
-  const trailButton = root.querySelector<HTMLButtonElement>('.trail-button')!;
   const coordinateLabel = root.querySelector<HTMLElement>('.live-coordinates')!;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const events = new AbortController(), { signal } = events;
@@ -46,7 +41,6 @@ export function mountLagosField(root: HTMLElement): () => void {
   let width = 0, height = 0, dpr = 1, spacing = 10, columns = 0, rows = 0, tileColumns = 0;
   let animation = 0, lastFrame = 0, time = 0, disposed = false, lastCoordinateUpdate = 0;
   let paused = reducedMotion.matches, dark = root.dataset.theme === 'dark';
-  let trails = trailButton.getAttribute('aria-pressed') !== 'false';
   let down = false, pointerId: number | null = null, dragDistance = 0;
   let previousSample: Sample | null = null;
   let map = { left: 0, top: 0, width: 1, height: 1 };
@@ -58,8 +52,6 @@ export function mountLagosField(root: HTMLElement): () => void {
       ? ['#a7c6af', '#deedc9', '#648f88', '#b9f581', '#f2e5b7']
       : ['#38594c', '#247e6c', '#789791', '#638d21', '#a86527'];
     root.dataset.theme = dark ? 'dark' : 'light';
-    const label = `Switch to ${dark ? 'light' : 'dark'} theme`;
-    themeButton.setAttribute('aria-label', label); themeButton.title = label;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', paper);
   }
 
@@ -180,7 +172,6 @@ export function mountLagosField(root: HTMLElement): () => void {
         p.vy = clamp(p.vy + (ry / Math.max(r, 1) * 48 + clamp(dy, -35, 35) * 2.4 + rx * .7) * push, -210, 210);
         p.spin = clamp(p.spin + push * (to.down ? 8 : 4), -14, 14); active.add(index);
       });
-    if (!trails) return;
     const count = Math.min(16, Math.floor(distance / 9));
     for (let i = 0; i < count; i++) {
       const t = (i + 1) / Math.max(1, count), jitter = hash(time + i, to.x), spread = to.down ? 17 : 7;
@@ -214,16 +205,14 @@ export function mountLagosField(root: HTMLElement): () => void {
       glyph(batches, p.shape, p.x + p.ox, p.y + p.oy, p.size * (1 + p.energy * .35), p.angle, color, clamp(p.alpha + p.energy * .7));
     }
     ctx.fillStyle = paper; ctx.fill(erase);
-    if (trails) {
-      ctx.lineCap = 'round'; ctx.strokeStyle = palette[3];
-      for (let i = 1; i < trace.length; i++) {
-        const a = trace[i - 1], b = trace[i], life = clamp(1 - (time - b.time) / 1100);
-        if (b.time - a.time > 140 || Math.hypot(b.x - a.x, b.y - a.y) > 130) continue;
-        ctx.globalAlpha = life * (b.down ? .4 : .2); ctx.lineWidth = life * (b.down ? 2 : 1);
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-        const steps = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 70);
-        for (let j = 0; j <= steps; j++) addTiles(tiles, a.x + (b.x - a.x) * j / Math.max(steps, 1), a.y + (b.y - a.y) * j / Math.max(steps, 1), 5);
-      }
+    ctx.lineCap = 'round'; ctx.strokeStyle = palette[3];
+    for (let i = 1; i < trace.length; i++) {
+      const a = trace[i - 1], b = trace[i], life = clamp(1 - (time - b.time) / 1100);
+      if (b.time - a.time > 140 || Math.hypot(b.x - a.x, b.y - a.y) > 130) continue;
+      ctx.globalAlpha = life * (b.down ? .4 : .2); ctx.lineWidth = life * (b.down ? 2 : 1);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      const steps = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 70);
+      for (let j = 0; j <= steps; j++) addTiles(tiles, a.x + (b.x - a.x) * j / Math.max(steps, 1), a.y + (b.y - a.y) * j / Math.max(steps, 1), 5);
     }
     for (const spark of sparks) {
       glyph(batches, spark.shape, spark.x, spark.y, spark.size * spark.life, spark.angle, 3, spark.life * .8);
@@ -241,7 +230,7 @@ export function mountLagosField(root: HTMLElement): () => void {
     for (const sample of samples) {
       sample.time = time;
       deposit(previousSample && time - previousSample.time < 180 ? previousSample : sample, sample);
-      if (trails) trace.push(sample); previousSample = sample;
+      trace.push(sample); previousSample = sample;
     }
     samples = [];
     if (trace.length > 80) trace.splice(0, trace.length - 80);
@@ -262,7 +251,7 @@ export function mountLagosField(root: HTMLElement): () => void {
       p.vx += (-p.ox * 115 - p.vx * 12) * dt; p.vy += (-p.oy * 115 - p.vy * 12) * dt;
       p.ox = clamp(p.ox + p.vx * dt, -45, 45); p.oy = clamp(p.oy + p.vy * dt, -45, 45);
       p.spin += (-p.angle * 42 - p.spin * 9) * dt; p.angle += p.spin * dt;
-      p.energy *= Math.exp(-dt * (trails ? 2.1 : 6));
+      p.energy *= Math.exp(-dt * 2.1);
       if (p.energy < .008 && Math.abs(p.ox) + Math.abs(p.oy) + Math.abs(p.vx) + Math.abs(p.vy) + Math.abs(p.angle) < .12) {
         p.ox = p.oy = p.vx = p.vy = p.angle = p.spin = p.energy = 0; active.delete(index);
       }
@@ -290,11 +279,7 @@ export function mountLagosField(root: HTMLElement): () => void {
     pointerId = null; down = false; root.dataset.drawing = 'false';
   }
   function updateMotion() {
-    root.dataset.paused = String(paused); motionButton.setAttribute('aria-pressed', String(paused));
-    const label = reducedMotion.matches ? 'Motion disabled by your device preference' : paused ? 'Resume motion' : 'Pause motion';
-    motionButton.setAttribute('aria-label', label); motionButton.title = label;
-    motionText.textContent = reducedMotion.matches ? 'Still' : paused ? 'Play' : 'Pause';
-    motionButton.disabled = reducedMotion.matches; pulseButton.disabled = paused; trailButton.disabled = paused;
+    root.dataset.paused = String(paused);
     if (paused) { cancelAnimationFrame(animation); animation = 0; endDrag(); resetField(); }
   }
 
@@ -330,13 +315,6 @@ export function mountLagosField(root: HTMLElement): () => void {
   root.addEventListener('lostpointercapture', () => { down = false; pointerId = null; root.dataset.drawing = 'false'; }, { signal });
   root.addEventListener('pointerleave', () => { if (!down) previousSample = null; }, { signal });
   window.addEventListener('blur', () => { endDrag(); previousSample = null; }, { signal });
-  motionButton.addEventListener('click', () => { paused = !paused; updateMotion(); }, { signal });
-  pulseButton.addEventListener('click', () => addPulse(width * .55, height * .47, 1.15), { signal });
-  trailButton.addEventListener('click', () => {
-    trails = !trails; trailButton.setAttribute('aria-pressed', String(trails));
-    if (!trails) { trace = []; sparks = []; wake(); }
-  }, { signal });
-  themeButton.addEventListener('click', () => { resetField(); dark = !dark; setPalette(); cacheMap(); }, { signal });
   reducedMotion.addEventListener('change', () => { paused = reducedMotion.matches; updateMotion(); }, { signal });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { cancelAnimationFrame(animation); animation = 0; endDrag(); resetField(); }
