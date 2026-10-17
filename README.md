@@ -31,4 +31,4 @@ The resting field is cached. A spatial grid limits interaction queries, and only
 changed canvas tiles are restored. Vector paths are grouped by color and opacity;
 frames stop when the bounded particles and pulses settle. No animation framework
 or runtime dependency is needed.
-Set the background’s `data-theme` to `dark` or `light` before mounting to choose the palette.
+The bottom-right theme button switches between dark green and paper palettes. Decorative labels do not select while drawing; foreground links and controls remain interactive.

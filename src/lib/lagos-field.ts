@@ -31,6 +31,7 @@ export function mountLagosField(root: HTMLElement): () => void {
   const context = canvas.getContext('2d', { alpha: false, desynchronized: true });
   if (!context) return () => {};
   const ctx = context;
+  const themeButton = root.querySelector<HTMLButtonElement>('.theme-button')!;
   const coordinateLabel = root.querySelector<HTMLElement>('.live-coordinates')!;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const events = new AbortController(), { signal } = events;
@@ -52,6 +53,8 @@ export function mountLagosField(root: HTMLElement): () => void {
       ? ['#a7c6af', '#deedc9', '#648f88', '#b9f581', '#f2e5b7']
       : ['#38594c', '#247e6c', '#789791', '#638d21', '#a86527'];
     root.dataset.theme = dark ? 'dark' : 'light';
+    const themeLabel = `Switch to ${dark ? 'light' : 'dark'} mode`;
+    themeButton.setAttribute('aria-label', themeLabel); themeButton.title = themeLabel;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', paper);
   }
 
@@ -300,7 +303,10 @@ export function mountLagosField(root: HTMLElement): () => void {
     samplePointer(event);
   }, { signal, passive: true });
   root.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || isControl(event.target) || paused || reducedMotion.matches) return;
+    if (event.button !== 0 || isControl(event.target)) return;
+    // A map gesture should not start native text selection after repeated clicks.
+    event.preventDefault();
+    if (paused || reducedMotion.matches) return;
     down = true; pointerId = event.pointerId; dragDistance = 0; previousSample = null;
     root.dataset.drawing = 'true'; root.setPointerCapture(event.pointerId); samplePointer(event);
   }, { signal });
@@ -314,6 +320,7 @@ export function mountLagosField(root: HTMLElement): () => void {
   root.addEventListener('lostpointercapture', () => { down = false; pointerId = null; root.dataset.drawing = 'false'; }, { signal });
   root.addEventListener('pointerleave', () => { if (!down) previousSample = null; }, { signal });
   window.addEventListener('blur', () => { endDrag(); previousSample = null; }, { signal });
+  themeButton.addEventListener('click', () => { endDrag(); resetField(); dark = !dark; setPalette(); cacheMap(); }, { signal });
   reducedMotion.addEventListener('change', () => { paused = reducedMotion.matches; updateMotion(); }, { signal });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { cancelAnimationFrame(animation); animation = 0; endDrag(); resetField(); }
