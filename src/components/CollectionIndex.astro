@@ -10,7 +10,6 @@ const entries = await publishedEntries(collection);
 ---
 <SectionLayout title={title} description={description}>
   <div class="section-intro">
-    {!writings && <p class="eyebrow">Selected work</p>}
     <h1>{title}<span class="accent">.</span></h1>
     <p class="lede">{description}</p>
   </div>
@@ -18,7 +17,7 @@ const entries = await publishedEntries(collection);
     {entries.map((entry, index) => <li>
       <a class="entry-link" href={entryHref(collection, entry.id)}>
         <div class="entry-meta"><span>{writings ? formatDate(entry.data.date) : String(index + 1).padStart(2, '0')}</span>{'featured' in entry.data && entry.data.featured && <span class="accent">Featured</span>}</div>
-        <div class="entry-copy"><h2>{entry.data.title}</h2><p>{entry.data.description}</p>{entry.data.tags.length > 0 && <div class="tags">{entry.data.tags.map(tag => <span>{tag}</span>)}</div>}</div>
+        <div class="entry-copy"><h2>{entry.data.title}</h2><p>{entry.data.description}</p>{writings && entry.data.tags.length > 0 && <div class="tags">{entry.data.tags.map(tag => <span>{tag}</span>)}</div>}</div>
         <span class="entry-arrow" aria-hidden="true">↗</span>
       </a>
     </li>)}
