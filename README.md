@@ -33,9 +33,63 @@ frames stop when the bounded particles and pulses settle. No animation framework
 or runtime dependency is needed.
 The bottom-right theme button switches between dark green and paper palettes. Decorative labels do not select while drawing; foreground links and controls remain interactive.
 
-The profile navigation reserves Writings, Résumé, and Projects. Set their `href` values
-in `profileLinks` in `LagosBackground.astro` when destinations are ready. Until then,
-they render as non-clickable placeholders; no blog or showcase routes are published yet.
+## Writing and projects
 
-Social icons sit separately in the bottom left. GitHub is linked; LinkedIn and
-Twitter/X are placeholders until their URLs are added to `socialLinks`.
+Edit Markdown files in `src/content/writings/` and `src/content/projects/`.
+Each filename becomes a URL: `my-note.md` becomes `/writings/my-note/`.
+Nested folders work too. Keep filenames stable to keep published links working.
+Astro reads these files at build time, so commit your changes and rebuild/redeploy
+the site to publish them. No CMS or runtime fetch is needed.
+
+```yaml
+---
+title: "A title"
+description: "A short summary used in the listing and page metadata."
+date: 2026-10-17
+draft: true
+tags: [Design, Development]
+---
+```
+
+Write the body below the frontmatter using normal Markdown. Headings, lists,
+links, images, quotes, tables, and code blocks are styled automatically. Put
+images in `public/images/` and reference them as `![Description](/images/name.webp)`.
+The page already supplies the title, so start body headings at `##`.
+
+Set `draft: false` (or omit it) to publish. Drafts have **no public route** and do
+not appear in lists, including in development. `first-note.md` is an unpublished
+starter to replace with your own writing. The portfolio itself is the first project.
+There is a designed empty state when a collection has no published entries.
+
+Projects accept three additional optional frontmatter fields:
+
+```yaml
+featured: true
+url: "https://example.com"
+repository: "https://github.com/your-name/your-project"
+```
+
+Omit links you do not have. Writings are sorted newest first; featured projects
+appear first, then newest first. Invalid metadata fails the build with a file-specific
+error. Draft dates do not schedule publication: use `draft` explicitly.
+
+## Résumé
+
+Set `resumeUrl` in `src/site.config.ts` to the stable URL of your GitHub PDF.
+The same Résumé link appears on the homepage and section navigation, and opens
+in a new tab. Updating the PDF at that URL does not require editing the site;
+changing the URL requires a rebuild. Until a URL is supplied, Résumé remains a
+non-clickable placeholder.
+
+## Navigation and themes
+
+Writings and Projects have shareable index and detail URLs. Astro's client router
+adds short fade/movement transitions and browser back/forward navigation while
+ordinary links also work without JavaScript. Reduced-motion preferences disable
+transitions. The selected theme carries across client navigation; a fresh load
+starts in dark mode. Reading pages allow normal document scrolling and text
+selection, with footer controls after the content so they never cover the text.
+
+Social icons sit separately in the bottom left on the homepage and in the footer
+on reading pages. GitHub is linked; LinkedIn and Twitter/X are placeholders until
+their URLs are added to `socialLinks` in `src/components/PortfolioUtilities.astro`.

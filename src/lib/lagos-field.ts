@@ -31,7 +31,7 @@ export function mountLagosField(root: HTMLElement): () => void {
   const context = canvas.getContext('2d', { alpha: false, desynchronized: true });
   if (!context) return () => {};
   const ctx = context;
-  const themeButton = root.querySelector<HTMLButtonElement>('.theme-button')!;
+  const themeButton = document.querySelector<HTMLButtonElement>('.theme-button')!;
   const coordinateLabel = root.querySelector<HTMLElement>('.live-coordinates')!;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const events = new AbortController(), { signal } = events;
@@ -53,6 +53,7 @@ export function mountLagosField(root: HTMLElement): () => void {
       ? ['#a7c6af', '#deedc9', '#648f88', '#b9f581', '#f2e5b7']
       : ['#38594c', '#247e6c', '#789791', '#638d21', '#a86527'];
     root.dataset.theme = dark ? 'dark' : 'light';
+    document.documentElement.dataset.theme = root.dataset.theme;
     const themeLabel = `Switch to ${dark ? 'light' : 'dark'} mode`;
     themeButton.setAttribute('aria-label', themeLabel); themeButton.title = themeLabel;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', paper);

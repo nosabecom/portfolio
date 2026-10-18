@@ -1,0 +1,25 @@
+---
+import { contentTransition } from '../lib/transitions';
+import Layout from './Layout.astro';
+import LagosBackground from '../components/LagosBackground.astro';
+import PortfolioNav from '../components/PortfolioNav.astro';
+import PortfolioUtilities from '../components/PortfolioUtilities.astro';
+import '../styles/content.css';
+interface Props { title: string; description: string; }
+const { title, description } = Astro.props;
+---
+<Layout title={`${title} — Nosa Omokaro`} description={description}>
+  <LagosBackground home={false} />
+  <div class="content-page">
+  <div class="reading-shell" data-no-terrain>
+    <header class="section-header">
+      <a class="home-link" href="/" aria-label="Nosa Omokaro — home"><img src="/profile.webp" width="36" height="36" alt="" /> <span>Nosa Omokaro<span class="accent">.</span></span></a>
+      <PortfolioNav />
+    </header>
+    <main id="main-content" class="section-content" tabindex="-1" transition:name="page-content" transition:animate={contentTransition}>
+      <slot />
+    </main>
+  </div>
+  <PortfolioUtilities />
+  </div>
+</Layout>

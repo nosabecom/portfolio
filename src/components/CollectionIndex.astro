@@ -1,0 +1,26 @@
+---
+import SectionLayout from '../layouts/SectionLayout.astro';
+import { publishedEntries, entryHref, formatDate } from '../lib/content';
+interface Props { collection: 'writings' | 'projects'; }
+const { collection } = Astro.props;
+const writings = collection === 'writings';
+const title = writings ? 'Writings' : 'Projects';
+const description = writings ? 'Notes, ideas, and things worth writing down.' : 'Things made with curiosity and care.';
+const entries = await publishedEntries(collection);
+---
+<SectionLayout title={title} description={description}>
+  <div class="section-intro">
+    <p class="eyebrow">{writings ? 'Notes & perspectives' : 'Selected work'}</p>
+    <h1>{title}<span class="accent">.</span></h1>
+    <p class="lede">{description}</p>
+  </div>
+  {entries.length ? <ul class="entry-list">
+    {entries.map((entry, index) => <li>
+      <a class="entry-link" href={entryHref(collection, entry.id)}>
+        <div class="entry-meta"><span>{writings ? formatDate(entry.data.date) : String(index + 1).padStart(2, '0')}</span>{'featured' in entry.data && entry.data.featured && <span class="accent">Featured</span>}</div>
+        <div class="entry-copy"><h2>{entry.data.title}</h2><p>{entry.data.description}</p>{entry.data.tags.length > 0 && <div class="tags">{entry.data.tags.map(tag => <span>{tag}</span>)}</div>}</div>
+        <span class="entry-arrow" aria-hidden="true">↗</span>
+      </a>
+    </li>)}
+  </ul> : <div class="empty-state"><span class="empty-mark" aria-hidden="true">✳</span><h2>{writings ? 'A little quiet here, for now.' : 'More work on the way.'}</h2><p>{writings ? 'The first piece is still taking shape. Check back soon.' : 'New projects will find a home here soon.'}</p><a class="text-link" href="/">Back to the map <span aria-hidden="true">↗</span></a></div>}
+</SectionLayout>

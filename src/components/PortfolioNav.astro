@@ -1,0 +1,22 @@
+---
+import { profileLinks } from '../site.config';
+---
+<nav class="profile-nav" aria-label="Portfolio">
+  <ul>
+    {profileLinks.map(({ label, href }) => (
+      <li>{href ? <a href={href} aria-current={Astro.url.pathname.startsWith(href) ? 'page' : undefined} target={label === 'Résumé' ? '_blank' : undefined} rel={label === 'Résumé' ? 'noopener noreferrer' : undefined} aria-label={label === 'Résumé' ? 'Résumé (PDF, opens in a new tab)' : undefined}>{label}</a> : <span role="link" aria-disabled="true" title="Résumé coming soon">{label}</span>}</li>
+    ))}
+  </ul>
+</nav>
+<style>
+  .profile-nav { color: var(--muted); font-size: 13px; letter-spacing: .2px; }
+  ul { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 0; padding: 0; list-style: none; }
+  li { display: flex; align-items: center; gap: 16px; }
+  li + li::before { content: '·'; opacity: .45; }
+  a, span { display: block; padding: 12px 0; }
+  a { color: inherit; text-decoration: none; transition: color .18s; }
+  a:hover, a[aria-current] { color: var(--ink); }
+  a[aria-current] { text-decoration: underline; text-underline-offset: 7px; text-decoration-color: var(--accent); }
+  [aria-disabled='true'] { cursor: default; }
+  @media (prefers-reduced-motion: reduce) { a { transition: none; } }
+</style>
