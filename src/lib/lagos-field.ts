@@ -209,7 +209,7 @@ export function mountLagosField(root: HTMLElement): () => void {
       const p = points[index]!, padding = p.size * 1.15 + .8;
       erase.rect(p.x - padding, p.y - padding, padding * 2, padding * 2);
       addTiles(tiles, p.x, p.y, padding); addTiles(tiles, p.x + p.ox, p.y + p.oy, p.size * 2 + 2);
-      const color = p.energy > .75 ? 4 : p.energy > .08 ? 3 : p.palette;
+      const color = p.energy > .75 ? 4 : 3;
       glyph(batches, p.shape, p.x + p.ox, p.y + p.oy, p.size * (1 + p.energy * .35), p.angle, color, clamp(p.alpha + p.energy * .7));
     }
     ctx.fillStyle = paper; ctx.fill(erase);
@@ -260,7 +260,8 @@ export function mountLagosField(root: HTMLElement): () => void {
       p.ox = clamp(p.ox + p.vx * dt, -45, 45); p.oy = clamp(p.oy + p.vy * dt, -45, 45);
       p.spin += (-p.angle * 42 - p.spin * 9) * dt; p.angle += p.spin * dt;
       p.energy *= Math.exp(-dt * 2.1);
-      if (p.energy < .008 && Math.abs(p.ox) + Math.abs(p.oy) + Math.abs(p.vx) + Math.abs(p.vy) + Math.abs(p.angle) < .12) {
+      // Restore the cached map when the green highlight ends, avoiding a pale afterglow.
+      if (p.energy < .08) {
         p.ox = p.oy = p.vx = p.vy = p.angle = p.spin = p.energy = 0; active.delete(index);
       }
     }

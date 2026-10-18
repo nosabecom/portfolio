@@ -3,6 +3,7 @@ interface Props { floating?: boolean; }
 const { floating = false } = Astro.props;
 // Add the remaining profile URLs when available.
 const socialLinks: { label: string; href: string | null; path: string }[] = [
+  { label: 'Email', href: 'mailto:nosa@nosa.dev', path: 'M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm0 2h16l-8 6L4 6Zm0 2.5 7.4 5.55a1 1 0 0 0 1.2 0L20 8.5V18H4V8.5Z' },
   { label: 'LinkedIn', href: null, path: 'M20.45 2H3.55C2.69 2 2 2.68 2 3.52v16.96C2 21.32 2.69 22 3.55 22h16.9c.86 0 1.55-.68 1.55-1.52V3.52C22 2.68 21.31 2 20.45 2ZM7.93 18.75H4.98V9.2h2.95v9.55ZM6.45 7.9a1.71 1.71 0 1 1 0-3.42 1.71 1.71 0 0 1 0 3.42Zm12.3 10.85H15.8V14.1c0-1.11-.02-2.54-1.55-2.54-1.55 0-1.79 1.21-1.79 2.46v4.73H9.51V9.2h2.83v1.3h.04c.39-.74 1.36-1.52 2.79-1.52 2.98 0 3.58 1.96 3.58 4.51v5.26Z' },
   { label: 'Twitter / X', href: null, path: 'M18.9 2H22l-6.77 7.74L23.2 22h-6.24l-4.89-7.42L5.58 22H2.45l7.94-9.08L.8 2h6.4l4.42 6.74L18.9 2Zm-1.1 18h1.73L6.25 3.89H4.4L17.8 20Z' },
   { label: 'GitHub', href: 'https://github.com/nosabecom/', path: 'M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.23c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.77.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23A11.5 11.5 0 0 1 12 6.3c1.02 0 2.05.14 3.01.41 2.29-1.55 3.3-1.23 3.3-1.23.66 1.65.25 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.6-2.81 5.63-5.49 5.93.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 .5Z' },
@@ -13,7 +14,8 @@ const socialLinks: { label: string; href: string | null; path: string }[] = [
   <nav class="social-links" aria-label="Social profiles" data-no-terrain>
     {socialLinks.map(({ label, href, path }) => {
       const Tag = href ? 'a' : 'span';
-      return <Tag href={href ?? undefined} target={href ? '_blank' : undefined} rel={href ? 'noopener noreferrer' : undefined} role={href ? undefined : 'link'} aria-disabled={href ? undefined : 'true'} aria-label={href ? `${label} (opens in a new tab)` : label} title={href ? label : `${label} — coming soon`}>
+      const external = href?.startsWith('https://');
+      return <Tag href={href ?? undefined} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined} role={href ? undefined : 'link'} aria-disabled={href ? undefined : 'true'} aria-label={external ? `${label} (opens in a new tab)` : label} title={href ? label : `${label} — coming soon`}>
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={path}/></svg>
       </Tag>;
     })}

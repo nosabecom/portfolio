@@ -2,6 +2,7 @@
 import { ClientRouter } from 'astro:transitions';
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
+import NorthCompass from '../components/NorthCompass.astro';
 import identityFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 interface Props { title?: string; description?: string; }
 const {
@@ -26,6 +27,7 @@ const {
     <a class="skip-link" href="#main-content">Skip to content</a>
     <a class="map-credit" data-no-terrain href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data © OpenStreetMap contributors</a>
     <slot />
+    <NorthCompass />
     <Analytics />
     <SpeedInsights />
   </body>
