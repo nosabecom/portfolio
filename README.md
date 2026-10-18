@@ -56,11 +56,17 @@ tags: [Design, Development]
 Write the body below the frontmatter using normal Markdown. Headings, lists,
 links, images, quotes, tables, and code blocks are styled automatically. Put
 images in `public/images/` and reference them as `![Description](/images/name.webp)`.
-The page already supplies the title, so start body headings at `##`.
+For a caption, use an HTML `<figure>` with `<img>` and `<figcaption>` inside
+the Markdown file; the sample case study demonstrates this. Include descriptive
+alt text and image dimensions. The page already supplies the title, so start body
+headings at `##`.
 
 Set `draft: false` (or omit it) to publish. Drafts have **no public route** and do
 not appear in lists, including in development. `first-note.md` is an unpublished
-starter to replace with your own writing. The portfolio itself is the first project.
+starter to replace with your own writing. A published sample, `a-little-room-for-curiosity.md`,
+is included for testing the reading layout. The portfolio case study is also sample
+copy, with local screenshots in `public/images/lagos/`. Replace or remove these
+samples when your real content is ready.
 There is a designed empty state when a collection has no published entries.
 
 Projects accept three additional optional frontmatter fields:

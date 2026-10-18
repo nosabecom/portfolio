@@ -45,6 +45,9 @@
 .prose blockquote { border-left: 2px solid var(--accent); padding: 4px 0 4px 24px; font-style: italic; }
 .prose pre { max-width: 100%; overflow-x: auto; padding: 20px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; line-height: 1.7; }
 .prose :not(pre) > code { font-size: .86em; padding: 3px 5px; background: color-mix(in srgb, var(--muted) 12%, transparent); border-radius: 3px; }
+.prose figure { margin: 32px 0; }
+.prose figure img { width: 100%; border: 1px solid var(--line); }
+.prose figcaption { margin-top: 12px; font-size: 12px; line-height: 1.7; color: var(--muted); text-align: center; }
 .prose img { display: block; max-width: 100%; height: auto; border-radius: 8px; }
 .prose table { display: block; overflow-x: auto; border-collapse: collapse; font-size: 14px; }
 .prose th, .prose td { border: 1px solid var(--line); padding: 10px 16px; text-align: left; }
