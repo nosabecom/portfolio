@@ -69,6 +69,11 @@ headers so its glyphs and weight do not depend on fonts installed on the device.
 
 ## Writing and projects
 
+The section headings, introductory sentences, and empty-state messages are in
+`src/components/CollectionIndex.astro`. Edit `description` near the top to change
+“Notes, ideas, and things worth writing down.” or the Projects introduction.
+The same description is used for the page metadata. Rebuild/redeploy after editing.
+
 Edit Markdown files in `src/content/writings/` and `src/content/projects/`.
 Each filename becomes a URL: `my-note.md` becomes `/writings/my-note/`.
 Nested folders work too. Keep filenames stable to keep published links working.

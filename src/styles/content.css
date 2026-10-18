@@ -3,7 +3,7 @@
 .reading-shell > * { pointer-events: auto; }
 .section-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 88px; }
 .home-link { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; text-decoration: none; color: var(--ink); white-space: nowrap; }
-.home-link img { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #b792f64d; }
+.home-link img { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #b792f64d; -webkit-mask-image: radial-gradient(circle closest-side, #000 calc(100% - 3px), transparent 100%); mask-image: radial-gradient(circle closest-side, #000 calc(100% - 3px), transparent 100%); }
 .accent { color: var(--accent); }
 .section-content { outline: none; overflow-wrap: anywhere; }
 .section-intro { margin-bottom: 52px; }
