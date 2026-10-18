@@ -5,7 +5,7 @@ interface Props { collection: 'writings' | 'projects'; }
 const { collection } = Astro.props;
 const writings = collection === 'writings';
 const title = writings ? 'Writings' : 'Projects';
-const description = writings ? 'Notes, ideas, and things worth writing down.' : 'Things made with curiosity and care.';
+const description = writings ? 'stuff I wrote that YOU 🫵 should read (or dont, might be bad ¯\\(ツ)/¯)' : 'prolly EE related, prolly not (pls look 🥺)';
 const entries = await publishedEntries(collection);
 ---
 <SectionLayout title={title} description={description}>
