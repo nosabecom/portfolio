@@ -32,3 +32,7 @@ changed canvas tiles are restored. Vector paths are grouped by color and opacity
 frames stop when the bounded particles and pulses settle. No animation framework
 or runtime dependency is needed.
 The bottom-right theme button switches between dark green and paper palettes. Decorative labels do not select while drawing; foreground links and controls remain interactive.
+
+The profile navigation reserves Writings, Résumé, and Projects. Set their `href` values
+in `profileLinks` in `LagosBackground.astro` when destinations are ready. Until then,
+they render as non-clickable placeholders; no blog or showcase routes are published yet.
