@@ -143,8 +143,8 @@ starts in dark mode. Reading pages allow normal document scrolling and text
 selection, with footer controls after the content so they never cover the text.
 
 Social icons sit separately in the bottom left on the homepage and in the footer
-on reading pages. Email opens `mailto:nosa@nosa.dev` and GitHub links to the profile.
-LinkedIn and Twitter/X are placeholders until their URLs are added to `socialLinks`
+on reading pages. Email opens `mailto:nosa@nosa.dev`; LinkedIn, Twitter/X, and
+GitHub link to the owner’s profiles. Edit these destinations in `socialLinks`
 in `src/components/PortfolioUtilities.astro`.
 
 The compass has two small Easter eggs: clicking its arrow spins it once, and
