@@ -36,3 +36,6 @@ The bottom-right theme button switches between dark green and paper palettes. De
 The profile navigation reserves Writings, Résumé, and Projects. Set their `href` values
 in `profileLinks` in `LagosBackground.astro` when destinations are ready. Until then,
 they render as non-clickable placeholders; no blog or showcase routes are published yet.
+
+Social icons sit separately in the bottom left. GitHub is linked; LinkedIn and
+Twitter/X are placeholders until their URLs are added to `socialLinks`.
