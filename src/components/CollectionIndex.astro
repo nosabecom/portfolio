@@ -14,9 +14,10 @@ const entries = await publishedEntries(collection);
     <p class="lede">{description}</p>
   </div>
   {entries.length ? <ul class="entry-list">
-    {entries.map((entry, index) => <li>
-      <a class="entry-link" href={entryHref(collection, entry.id)}>
-        <div class="entry-meta"><span>{writings ? formatDate(entry.data.date) : String(index + 1).padStart(2, '0')}</span>{'featured' in entry.data && entry.data.featured && <span class="accent">Featured</span>}</div>
+    {entries.map((entry) => <li>
+      <a class:list={['entry-link', { 'project-entry': !writings, 'has-preview': entry.collection === 'projects' && !!entry.data.preview }]} href={entryHref(collection, entry.id)}>
+        {writings && <div class="entry-meta"><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time></div>}
+        {entry.collection === 'projects' && entry.data.preview && <img class="project-preview" src={entry.data.preview.src} alt={entry.data.preview.alt} width="640" height="400" loading="lazy" decoding="async" />}
         <div class="entry-copy"><h2>{entry.data.title}</h2><p>{entry.data.description}</p>{writings && entry.data.tags.length > 0 && <div class="tags">{entry.data.tags.map(tag => <span>{tag}</span>)}</div>}</div>
         <span class="entry-arrow" aria-hidden="true">↗</span>
       </a>

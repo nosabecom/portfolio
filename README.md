@@ -69,13 +69,21 @@ copy, with local screenshots in `public/images/lagos/`. Replace or remove these
 samples when your real content is ready.
 There is a designed empty state when a collection has no published entries.
 
-Projects accept three additional optional frontmatter fields:
+Projects accept these additional optional frontmatter fields:
 
 ```yaml
 featured: true
+preview:
+  src: "/images/lagos/dark-desktop.png"
+  alt: "The Lagos portfolio homepage with its geometric map."
 url: "https://example.com"
 repository: "https://github.com/your-name/your-project"
 ```
+
+The preview image appears beside the project summary, or above it on mobile.
+Use an image under `public/` and its site path, with descriptive alt text. Images
+are displayed at an 8:5 aspect ratio. Without a preview, the summary uses the row;
+no number or placeholder is shown. `featured` controls sorting without a visible badge.
 
 Omit links you do not have. Writings are sorted newest first; featured projects
 appear first, then newest first. Invalid metadata fails the build with a file-specific

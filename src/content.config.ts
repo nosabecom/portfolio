@@ -21,6 +21,10 @@ export const collections = {
     schema: z.object({
       ...common,
       featured: z.boolean().default(false),
+      preview: z.object({
+        src: z.string().min(1),
+        alt: z.string().min(1),
+      }).optional(),
       url: webUrl.optional(),
       repository: webUrl.optional(),
     }),

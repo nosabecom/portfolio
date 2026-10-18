@@ -3,6 +3,9 @@ title: "Lagos, in little shapes"
 description: "Turning a familiar coastline into a small, playable corner of the internet."
 date: 2026-10-17
 featured: true
+preview:
+  src: "/images/lagos/dark-desktop.png"
+  alt: "The Lagos portfolio homepage with a purple avatar over a geometric map."
 repository: "https://github.com/nosabecom/portfolio"
 ---
 *Sample case study for testing this layout. The screenshots show the actual portfolio; the copy is ready to replace.*
