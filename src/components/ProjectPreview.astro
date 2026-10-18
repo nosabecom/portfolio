@@ -1,0 +1,27 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  preview: NonNullable<CollectionEntry<'projects'>['data']['preview']>;
+}
+
+const { src, alt } = Astro.props.preview;
+---
+{typeof src === 'string' ? (
+  <img class="project-preview" src={src} alt={alt} width="640" height="400" loading="lazy" decoding="async" />
+) : (
+  <Image
+    class="project-preview"
+    src={src}
+    alt={alt}
+    width={176}
+    height={110}
+    widths={[88, 176, 352, 528]}
+    sizes="(max-width: 600px) max(76px, calc(28vw - 13.44px)), 176px"
+    format="webp"
+    quality={80}
+    loading="lazy"
+    decoding="async"
+  />
+)}

@@ -5,14 +5,16 @@ date: 2026-10-17
 draft: true
 featured: true
 preview:
-  src: "/images/lagos/dark-desktop.png"
+  src: "../../assets/lagos/dark-desktop.png"
   alt: "The Lagos portfolio homepage with a purple avatar over a geometric map."
 repository: "https://github.com/nosabecom/portfolio"
 ---
 *Sample case study for testing this layout. The screenshots show the actual portfolio; the copy is ready to replace.*
 
 <figure>
-  <img src="/images/lagos/dark-desktop.png" alt="The dark portfolio homepage, with Nosa Omokaro’s circular purple avatar centered over a map of Lagos drawn in tiny geometric shapes." width="1280" height="800" loading="lazy" decoding="async" />
+
+![The dark portfolio homepage, with Nosa Omokaro’s circular purple avatar centered over a map of Lagos drawn in tiny geometric shapes.](../../assets/lagos/dark-desktop.png)
+
   <figcaption>The starting point: a familiar place, drawn a little differently.</figcaption>
 </figure>
 
@@ -41,7 +43,9 @@ The shapes eventually return to their starting positions. That return matters: i
 The dark palette lets the purple avatar and pale lettering lead. The light palette gives the same geometry a softer, paper-like setting. Both use the same coastline and interactions.
 
 <figure>
-  <img src="/images/lagos/light-desktop.png" alt="The same Lagos portfolio in light mode, with a warm paper background and green geometric map." width="1280" height="800" loading="lazy" decoding="async" />
+
+![The same Lagos portfolio in light mode, with a warm paper background and green geometric map.](../../assets/lagos/light-desktop.png)
+
   <figcaption>A change of light, with the same underlying geography.</figcaption>
 </figure>
 

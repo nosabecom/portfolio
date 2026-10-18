@@ -42,6 +42,9 @@ The resting field is cached. A spatial grid limits interaction queries, and only
 changed canvas tiles are restored. Vector paths are grouped by color and opacity;
 frames stop when the bounded particles and pulses settle. No animation framework
 or runtime dependency is needed.
+The two canvas buffers share an eight-million-pixel budget (roughly 64 MB of raw
+RGBA pixels), with a maximum device-pixel ratio of two. Compact landscape screens
+place the avatar beside the profile copy so navigation and footer controls fit.
 The bottom-right theme button switches between dark green and paper palettes.
 OpenStreetMap attribution stays at the top right, opposite the coordinates. Decorative labels do not select while drawing; foreground links and controls remain interactive.
 
@@ -66,6 +69,10 @@ to grow the collection.
 
 The name uses a locally bundled Inter variable font on the homepage and section
 headers so its glyphs and weight do not depend on fonts installed on the device.
+Replace `src/assets/profile.webp` to update the avatar. `ProfileImage.astro` builds
+responsive WebP sizes for the homepage and small header, so phones download an
+appropriately sized image instead of the original. The edge feather remains in
+the homepage and header styles.
 
 ## Writing and projects
 
@@ -93,11 +100,13 @@ tags: [Design, Development]
 
 Write the body below the frontmatter using normal Markdown. Headings, lists,
 links, images, quotes, tables, and code blocks are styled automatically. Put
-images in `public/images/` and reference them as `![Description](/images/name.webp)`.
-For a caption, use an HTML `<figure>` with `<img>` and `<figcaption>` inside
-the Markdown file; the sample case study demonstrates this. Include descriptive
-alt text and image dimensions. The page already supplies the title, so start body
-headings at `##`.
+images in `src/assets/` and reference them with a relative Markdown path, such as
+`![Description](../../assets/my-image.png)`. Astro generates optimized WebP files
+and includes dimensions to prevent layout shifts. For captions, wrap the Markdown
+image and an HTML `<figcaption>` in `<figure>`, leaving blank lines around the
+Markdown image; the samples demonstrate this. Public images and remote HTML
+`<img>` tags also work but are not optimized; provide dimensions for those.
+The page already supplies the title, so start body headings at `##`.
 
 Set `draft: false` (or omit it) to publish. Drafts have **no public route** and do
 not appear in lists, including in development. The two sample fixtures are
@@ -106,7 +115,7 @@ not appear in lists, including in development. The two sample fixtures are
 To inspect a sample, temporarily set its draft flag to false and rebuild, then
 open `/writings/test/` or `/projects/test/`. Restore `draft: true` afterward.
 The samples include images, captions, lists, quotes, code, and a table; local
-screenshots live in `public/images/lagos/`. Copy a sample to a descriptive filename
+screenshots live in `src/assets/lagos/`. Copy a sample to a descriptive filename
 and replace its title and content when publishing your own work.
 There is a designed empty state when a collection has no published entries.
 
@@ -115,7 +124,7 @@ Projects accept these additional optional frontmatter fields:
 ```yaml
 featured: true
 preview:
-  src: "/images/lagos/dark-desktop.png"
+  src: "../../assets/lagos/dark-desktop.png"
   alt: "The Lagos portfolio homepage with its geometric map."
 url: "https://example.com"
 repository: "https://github.com/your-name/your-project"
@@ -123,8 +132,10 @@ repository: "https://github.com/your-name/your-project"
 
 The preview image appears beside the project summary, with a compact thumbnail
 and smaller typography on mobile.
-Use an image under `public/` and its site path, with descriptive alt text. Images
-are displayed at an 8:5 aspect ratio on desktop and cropped to 4:3 on mobile. Without a preview, the summary uses the row;
+Use a relative path to an image under `src/`, with descriptive alt text, to generate
+responsive WebP thumbnails. Site paths under `public/` and HTTP/HTTPS URLs also
+work as unoptimized fallbacks. Images are displayed at an 8:5 aspect ratio on
+desktop and cropped to 4:3 on mobile. Without a preview, the summary uses the row;
 no number or placeholder is shown. `featured` controls sorting without a visible badge.
 
 Omit links you do not have. Writings are sorted newest first; featured projects
@@ -136,7 +147,8 @@ error. Draft dates do not schedule publication: use `draft` explicitly.
 `/resume/` embeds the PDF with PDF.js, including selectable text, PDF links,
 page navigation, zoom, fit-to-width, and a download button in the viewer toolbar.
 The PDF viewer and worker load only when visiting this page. Leaving it releases
-the document, worker, resize observer, and download URL. Loading failures show
+the document, worker, internal observers/listeners, and download URL. The PDF fetch
+runs alongside lazy module loading. Loading failures show
 a retry button; the download remains available without JavaScript.
 
 The source is `build/resume.pdf` on the private `nosabecom/jobs` repo's

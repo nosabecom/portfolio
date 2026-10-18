@@ -4,9 +4,9 @@ import { resumePdfUrl } from '../site.config';
 <resume-viewer data-pdf-url={resumePdfUrl}>
   <div class="pdf-toolbar" role="toolbar" aria-label="PDF controls">
     <div class="pdf-controls">
-      <button type="button" data-previous aria-label="Previous page" disabled>‹</button>
+      <button type="button" data-previous aria-label="Previous page" hidden disabled>‹</button>
       <span data-page-status aria-live="polite">— / —</span>
-      <button type="button" data-next aria-label="Next page" disabled>›</button>
+      <button type="button" data-next aria-label="Next page" hidden disabled>›</button>
     </div>
     <div class="pdf-tools">
       <div class="pdf-controls">
@@ -42,6 +42,7 @@ import { resumePdfUrl } from '../site.config';
 
   class ResumeViewer extends HTMLElement {
     private events?: AbortController;
+    private renderEvents?: AbortController;
     private observer?: ResizeObserver;
     private task?: PDFDocumentLoadingTask;
     private viewer?: PDFViewer;
@@ -53,7 +54,20 @@ import { resumePdfUrl } from '../site.config';
       void this.load(this.events.signal);
     }
 
-    private async load(signal: AbortSignal) {
+    private async fetchPdf(signal: AbortSignal) {
+      // Each visit requests the latest published file rather than a stale branch URL.
+      const url = new URL(this.dataset.pdfUrl!);
+      url.searchParams.set('updated', String(Date.now()));
+      const response = await fetch(url, { signal, cache: 'no-store' });
+      if (!response.ok) throw new Error(`PDF request failed: ${response.status}`);
+      const data = await response.arrayBuffer();
+      if (new TextDecoder().decode(data.slice(0, 5)) !== '%PDF-') throw new Error('Invalid PDF response');
+      return data;
+    }
+
+    private async load(lifecycleSignal: AbortSignal) {
+      this.renderEvents = new AbortController();
+      const signal = AbortSignal.any([lifecycleSignal, this.renderEvents.signal]);
       const status = this.querySelector<HTMLElement>('[data-status]')!;
       const retry = this.querySelector<HTMLButtonElement>('[data-retry]')!;
       const download = this.querySelector<HTMLAnchorElement>('[data-download]')!;
@@ -62,28 +76,40 @@ import { resumePdfUrl } from '../site.config';
       this.removeAttribute('data-ready');
       retry.hidden = true;
       status.textContent = 'Loading résumé…';
+      this.querySelector('[data-page-status]')!.textContent = '— / —';
+      this.querySelectorAll<HTMLButtonElement>('[data-previous], [data-next]').forEach(button => { button.hidden = true; });
       download.href = this.dataset.pdfUrl!;
-      retry.addEventListener('click', () => { this.disconnectedCallback(); this.connectedCallback(); }, { signal });
+      buttons.forEach(button => { button.disabled = true; });
+      retry.addEventListener('click', () => { this.disconnectedCallback(); this.connectedCallback(); }, { signal: lifecycleSignal });
 
       try {
-        // Each visit requests the latest published file rather than a stale branch URL.
-        const url = new URL(this.dataset.pdfUrl!);
-        url.searchParams.set('updated', String(Date.now()));
-        const response = await fetch(url, { signal, cache: 'no-store' });
-        if (!response.ok) throw new Error(`PDF request failed: ${response.status}`);
-        const data = await response.arrayBuffer();
-        if (new TextDecoder().decode(data.slice(0, 5)) !== '%PDF-') throw new Error('Invalid PDF response');
-        const { getDocument, GlobalWorkerOptions } = await import('pdfjs-dist');
-        // The viewer module uses the core module's global exports; load it second.
-        const { EventBus, PDFLinkService, PDFViewer } = await import('pdfjs-dist/web/pdf_viewer.mjs');
+        // Fetch the PDF alongside the lazy modules instead of chaining three downloads.
+        const modules = import('pdfjs-dist').then(async core => ({
+          core,
+          // The viewer module uses the core module's global exports; load it second.
+          viewer: await import('pdfjs-dist/web/pdf_viewer.mjs'),
+        }));
+        const [data, { core, viewer: components }] = await Promise.all([this.fetchPdf(signal), modules]);
         if (signal.aborted) return;
+        const { getDocument, GlobalWorkerOptions, AnnotationEditorType } = core;
+        const { EventBus, PDFLinkService, PDFViewer } = components;
         GlobalWorkerOptions.workerSrc = workerUrl;
         this.downloadUrl = URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
         download.href = this.downloadUrl;
 
         const bus = new EventBus();
         const links = new PDFLinkService({ eventBus: bus, externalLinkTarget: 2, externalLinkRel: 'noopener noreferrer' });
-        const viewer = this.viewer = new PDFViewer({ container, eventBus: bus, linkService: links, removePageBorders: true, maxCanvasPixels: 8_000_000 });
+        const viewerOptions = {
+          container,
+          eventBus: bus,
+          linkService: links,
+          removePageBorders: true,
+          maxCanvasPixels: 8_000_000,
+          annotationEditorMode: AnnotationEditorType.DISABLE,
+          // PDF.js also owns resize, scroll, and selection listeners.
+          abortSignal: signal,
+        };
+        const viewer = this.viewer = new PDFViewer(viewerOptions);
         links.setViewer(viewer);
         const previous = this.querySelector<HTMLButtonElement>('[data-previous]')!;
         const next = this.querySelector<HTMLButtonElement>('[data-next]')!;
@@ -103,9 +129,9 @@ import { resumePdfUrl } from '../site.config';
           updateControls();
           status.textContent = 'Résumé loaded.';
           this.setAttribute('data-ready', '');
-        });
-        bus.on('pagechanging', updateControls);
-        bus.on('scalechanging', updateControls);
+        }, { signal });
+        bus.on('pagechanging', updateControls, { signal });
+        bus.on('scalechanging', updateControls, { signal });
         previous.addEventListener('click', () => { viewer.currentPageNumber--; }, { signal });
         next.addEventListener('click', () => { viewer.currentPageNumber++; }, { signal });
         zoomOut.addEventListener('click', () => { viewer.currentScale = Math.max(.25, viewer.currentScale / 1.2); }, { signal });
@@ -124,8 +150,13 @@ import { resumePdfUrl } from '../site.config';
         if (signal.aborted) return;
         links.setDocument(document);
         viewer.setDocument(document);
+        // setDocument initializes pages asynchronously; surface those failures too.
+        await viewer.pagesPromise;
       } catch (error) {
-        if (signal.aborted) return;
+        if (lifecycleSignal.aborted) return;
+        this.releaseResources();
+        this.removeAttribute('data-ready');
+        download.href = this.dataset.pdfUrl!;
         buttons.forEach(button => { button.disabled = true; });
         status.textContent = 'Couldn’t load the résumé. Try again or use the download button above.';
         retry.hidden = false;
@@ -133,16 +164,24 @@ import { resumePdfUrl } from '../site.config';
       }
     }
 
-    disconnectedCallback() {
-      this.events?.abort();
-      this.events = undefined;
+    private releaseResources() {
+      this.renderEvents?.abort();
+      this.renderEvents = undefined;
       this.observer?.disconnect();
+      this.observer = undefined;
       this.viewer?.setDocument(null);
+      void this.viewer?.l10n?.destroy().catch(() => {});
       this.viewer = undefined;
       void this.task?.destroy().catch(() => {});
       this.task = undefined;
       if (this.downloadUrl) URL.revokeObjectURL(this.downloadUrl);
       this.downloadUrl = undefined;
+    }
+
+    disconnectedCallback() {
+      this.events?.abort();
+      this.events = undefined;
+      this.releaseResources();
     }
   }
   if (!customElements.get('resume-viewer')) customElements.define('resume-viewer', ResumeViewer);

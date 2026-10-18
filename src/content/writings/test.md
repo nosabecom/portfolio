@@ -10,7 +10,7 @@ Some pages explain themselves all at once. Every corner has a label, every butto
 
 There is another possibility: leave a little room for someone to notice something on their own.
 
-![A dark, geometric map of Lagos behind the centered profile on Nosa’s portfolio.](/images/lagos/dark-desktop.png)
+![A dark, geometric map of Lagos behind the centered profile on Nosa’s portfolio.](../../assets/lagos/dark-desktop.png)
 
 ## A small invitation
 
@@ -36,7 +36,9 @@ These questions tend to lead toward smaller gestures. A brief trail instead of a
 ## The same idea, in a different light
 
 <figure>
-  <img src="/images/lagos/light-desktop.png" alt="The Lagos portfolio in a light paper palette, retaining the same profile and map composition." width="1280" height="800" loading="lazy" decoding="async" />
+
+![The Lagos portfolio in a light paper palette, retaining the same profile and map composition.](../../assets/lagos/light-desktop.png)
+
   <figcaption>Changing the palette is a useful way to see which parts of a composition are doing the work.</figcaption>
 </figure>
 

@@ -10,6 +10,7 @@ const common = {
   tags: z.array(z.string()).default([]),
 };
 const webUrl = z.url().refine((value) => /^https?:\/\//.test(value), 'Use an HTTP or HTTPS URL');
+const imageUrl = z.string().regex(/^(?:\/|https?:\/\/)/, 'Use a public path or an HTTP or HTTPS URL');
 
 export const collections = {
   writings: defineCollection({
@@ -18,11 +19,11 @@ export const collections = {
   }),
   projects: defineCollection({
     loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
-    schema: z.object({
+    schema: ({ image }) => z.object({
       ...common,
       featured: z.boolean().default(false),
       preview: z.object({
-        src: z.string().min(1),
+        src: z.union([imageUrl, image()]),
         alt: z.string().min(1),
       }).optional(),
       url: webUrl.optional(),

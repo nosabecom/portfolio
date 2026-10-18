@@ -9,6 +9,8 @@ type Pulse = { x: number; y: number; start: number; strength: number };
 type Spark = { x: number; y: number; vx: number; vy: number; life: number; size: number; shape: number; angle: number };
 type Batch = { strokes: Path2D; dots: Path2D };
 const TAU = Math.PI * 2, TILE = 112, SHADES = 12;
+// Two RGBA canvases stay below roughly 64 MB, including on large HiDPI screens.
+const MAX_CANVAS_PIXELS = 8_000_000;
 const clamp = (v: number, min = 0, max = 1) => Math.max(min, Math.min(max, v));
 const hash = (x: number, y: number) => {
   const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
@@ -37,7 +39,7 @@ export function mountLagosField(root: HTMLElement): () => void {
   const events = new AbortController(), { signal } = events;
   const active = new Set<number>();
   let points: (Particle | undefined)[] = [], samples: Sample[] = [], trace: Sample[] = [], pulses: Pulse[] = [], sparks: Spark[] = [];
-  let previousTiles = new Set<number>();
+  let previousTiles = new Set<number>(), nextTiles = new Set<number>();
   let restingMap: HTMLCanvasElement;
   let width = 0, height = 0, dpr = 1, spacing = 10, columns = 0, rows = 0, tileColumns = 0;
   let animation = 0, lastFrame = 0, time = 0, disposed = false, lastCoordinateUpdate = 0;
@@ -66,12 +68,21 @@ export function mountLagosField(root: HTMLElement): () => void {
     let batch = batches.get(key);
     if (!batch) { batch = { strokes: new Path2D(), dots: new Path2D() }; batches.set(key, batch); }
     if (shape === 3) { batch.dots.rect(x - size * .25, y - size * .25, size * .5, size * .5); return; }
-    const cos = Math.cos(angle), sin = Math.sin(angle), path = batch.strokes;
-    const move = (u: number, v: number) => path.moveTo(x + (u * cos - v * sin) * size, y + (u * sin + v * cos) * size);
-    const line = (u: number, v: number) => path.lineTo(x + (u * cos - v * sin) * size, y + (u * sin + v * cos) * size);
-    if (shape === 0) { move(-1, 0); line(1, 0); move(0, -1); line(0, 1); }
-    if (shape === 1) { move(-.72, -.72); line(.72, .72); move(.72, -.72); line(-.72, .72); }
-    if (shape === 2) { move(0, -1.1); line(1, .7); line(-1, .7); path.closePath(); }
+    const cos = angle ? Math.cos(angle) * size : size, sin = angle ? Math.sin(angle) * size : 0;
+    const path = batch.strokes;
+    // Construct the glyph directly: no closures or trigonometry for resting shapes.
+    if (shape === 0) {
+      path.moveTo(x - cos, y - sin); path.lineTo(x + cos, y + sin);
+      path.moveTo(x + sin, y - cos); path.lineTo(x - sin, y + cos);
+    } else if (shape === 1) {
+      const a = .72 * (cos - sin), b = .72 * (cos + sin);
+      path.moveTo(x - a, y - b); path.lineTo(x + a, y + b);
+      path.moveTo(x + b, y - a); path.lineTo(x - b, y + a);
+    } else if (shape === 2) {
+      path.moveTo(x + sin * 1.1, y - cos * 1.1);
+      path.lineTo(x + cos - sin * .7, y + sin + cos * .7);
+      path.lineTo(x - cos - sin * .7, y - sin + cos * .7); path.closePath();
+    }
   }
 
   function paintBatches(pen: CanvasRenderingContext2D, batches: Map<number, Batch>, animated = false) {
@@ -101,11 +112,12 @@ export function mountLagosField(root: HTMLElement): () => void {
     }
     active.clear(); samples = []; trace = []; pulses = []; sparks = []; previousSample = null;
     if (restingMap) { ctx.globalAlpha = 1; ctx.drawImage(restingMap, 0, 0, width, height); }
-    previousTiles.clear();
+    previousTiles.clear(); nextTiles.clear();
   }
 
   function resize() {
-    const bounds = root.getBoundingClientRect(), nextDpr = Math.min(devicePixelRatio || 1, 2);
+    const bounds = root.getBoundingClientRect();
+    const nextDpr = Math.min(devicePixelRatio || 1, 2, Math.sqrt(MAX_CANVAS_PIXELS / (bounds.width * bounds.height)));
     if (!bounds.width || !bounds.height || (width === bounds.width && height === bounds.height && dpr === nextDpr)) return;
     resetField(); width = bounds.width; height = bounds.height; dpr = nextDpr;
     canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
@@ -115,11 +127,12 @@ export function mountLagosField(root: HTMLElement): () => void {
     map = { width: mapWidth, height: mapWidth / LAGOS_ASPECT_RATIO, left: (width - mapWidth) / 2, top: 0 };
     map.top = (height - map.height) * (mobile ? .4 : .43);
     for (const [key, value] of Object.entries(map)) root.style.setProperty(`--map-${key}`, `${value}px`);
-    root.querySelectorAll<HTMLElement>('.place-label').forEach((label) => {
+    const labels = Array.from(root.querySelectorAll<HTMLElement>('.place-label'));
+    const clippedLabels = labels.map((label) => {
       const rect = label.getBoundingClientRect();
-      const clipped = rect.left < bounds.left + 12 || rect.right > bounds.right - 12 || rect.top < bounds.top + 12 || rect.bottom > bounds.bottom - 12;
-      label.style.visibility = mobile && clipped ? 'hidden' : '';
+      return rect.left < bounds.left + 12 || rect.right > bounds.right - 12 || rect.top < bounds.top + 12 || rect.bottom > bounds.bottom - 12;
     });
+    labels.forEach((label, index) => { label.style.visibility = mobile && clippedLabels[index] ? 'hidden' : ''; });
     spacing = Math.max(mobile ? 7.5 : 9.5, Math.sqrt(width * height / 15500));
     columns = Math.ceil(width / spacing); rows = Math.ceil(height / spacing); tileColumns = Math.ceil(width / TILE);
     points = new Array(columns * rows);
@@ -167,17 +180,20 @@ export function mountLagosField(root: HTMLElement): () => void {
   }
 
   function deposit(from: Sample, to: Sample) {
-    const dx = to.x - from.x, dy = to.y - from.y, distance = Math.hypot(dx, dy);
+    const dx = to.x - from.x, dy = to.y - from.y, distanceSquared = dx * dx + dy * dy;
+    const distance = Math.sqrt(distanceSquared);
     const radius = to.down ? 77 : 43, force = to.down ? 1.4 : .75;
+    const radiusSquared = radius * radius, dragX = clamp(dx, -35, 35) * 2.4, dragY = clamp(dy, -35, 35) * 2.4;
     nearby(Math.min(from.x, to.x) - radius, Math.min(from.y, to.y) - radius,
       Math.max(from.x, to.x) + radius, Math.max(from.y, to.y) + radius, (p, index) => {
-        const along = distance ? clamp(((p.x - from.x) * dx + (p.y - from.y) * dy) / (distance * distance)) : 0;
-        const rx = p.x - from.x - dx * along, ry = p.y - from.y - dy * along, r = Math.hypot(rx, ry);
-        if (r >= radius) return;
+        const along = distanceSquared ? clamp(((p.x - from.x) * dx + (p.y - from.y) * dy) / distanceSquared) : 0;
+        const rx = p.x - from.x - dx * along, ry = p.y - from.y - dy * along, distanceFromTrail = rx * rx + ry * ry;
+        if (distanceFromTrail >= radiusSquared) return;
+        const r = Math.sqrt(distanceFromTrail);
         const push = (1 - r / radius) ** 2 * force;
         p.energy = Math.max(p.energy, push);
-        p.vx = clamp(p.vx + (rx / Math.max(r, 1) * 48 + clamp(dx, -35, 35) * 2.4 - ry * .7) * push, -210, 210);
-        p.vy = clamp(p.vy + (ry / Math.max(r, 1) * 48 + clamp(dy, -35, 35) * 2.4 + rx * .7) * push, -210, 210);
+        p.vx = clamp(p.vx + (rx / Math.max(r, 1) * 48 + dragX - ry * .7) * push, -210, 210);
+        p.vy = clamp(p.vy + (ry / Math.max(r, 1) * 48 + dragY + rx * .7) * push, -210, 210);
         p.spin = clamp(p.spin + push * (to.down ? 8 : 4), -14, 14); active.add(index);
       });
     const count = Math.min(16, Math.floor(distance / 9));
@@ -204,7 +220,8 @@ export function mountLagosField(root: HTMLElement): () => void {
       const w = Math.min(TILE, width - x), h = Math.min(TILE, height - y);
       ctx.drawImage(restingMap, x * dpr, y * dpr, w * dpr, h * dpr, x, y, w, h);
     }
-    const tiles = new Set<number>(), batches = new Map<number, Batch>(), erase = new Path2D();
+    const tiles = nextTiles, batches = new Map<number, Batch>(), erase = new Path2D();
+    tiles.clear();
     for (const index of active) {
       const p = points[index]!, padding = p.size * 1.15 + .8;
       erase.rect(p.x - padding, p.y - padding, padding * 2, padding * 2);
@@ -216,17 +233,19 @@ export function mountLagosField(root: HTMLElement): () => void {
     ctx.lineCap = 'round'; ctx.strokeStyle = palette[3];
     for (let i = 1; i < trace.length; i++) {
       const a = trace[i - 1], b = trace[i], life = clamp(1 - (time - b.time) / 1100);
-      if (b.time - a.time > 140 || Math.hypot(b.x - a.x, b.y - a.y) > 130) continue;
+      const dx = b.x - a.x, dy = b.y - a.y, distanceSquared = dx * dx + dy * dy;
+      if (b.time - a.time > 140 || distanceSquared > 130 * 130) continue;
       ctx.globalAlpha = life * (b.down ? .4 : .2); ctx.lineWidth = life * (b.down ? 2 : 1);
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-      const steps = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 70);
+      const steps = Math.ceil(Math.sqrt(distanceSquared) / 70);
       for (let j = 0; j <= steps; j++) addTiles(tiles, a.x + (b.x - a.x) * j / Math.max(steps, 1), a.y + (b.y - a.y) * j / Math.max(steps, 1), 5);
     }
     for (const spark of sparks) {
       glyph(batches, spark.shape, spark.x, spark.y, spark.size * spark.life, spark.angle, 3, spark.life * .8);
       addTiles(tiles, spark.x, spark.y, 6);
     }
-    paintBatches(ctx, batches, true); previousTiles = tiles;
+    paintBatches(ctx, batches, true);
+    nextTiles = previousTiles; previousTiles = tiles;
   }
 
   function frame(timestamp: number) {
@@ -235,6 +254,7 @@ export function mountLagosField(root: HTMLElement): () => void {
     const elapsed = lastFrame ? Math.min(timestamp - lastFrame, 50) : 16.7;
     lastFrame = timestamp; time += elapsed;
     const dt = Math.min(elapsed / 1000, .032);
+    const energyDecay = Math.exp(-dt * 2.1), sparkDrag = Math.exp(-dt * 3);
     for (const sample of samples) {
       sample.time = time;
       deposit(previousSample && time - previousSample.time < 180 ? previousSample : sample, sample);
@@ -246,9 +266,11 @@ export function mountLagosField(root: HTMLElement): () => void {
     pulses = pulses.filter(pulse => time - pulse.start < 1400);
     for (const pulse of pulses) {
       const age = (time - pulse.start) / 1000, radius = age * 245, fade = 1 - age / 1.4;
+      const innerRadiusSquared = Math.max(0, radius - 24) ** 2, outerRadiusSquared = (radius + 24) ** 2;
       nearby(pulse.x - radius - 24, pulse.y - radius - 24, pulse.x + radius + 24, pulse.y + radius + 24, (p, index) => {
-        const dx = p.x - pulse.x, dy = p.y - pulse.y, r = Math.hypot(dx, dy), edge = Math.abs(r - radius);
-        if (edge > 24) return;
+        const dx = p.x - pulse.x, dy = p.y - pulse.y, distanceSquared = dx * dx + dy * dy;
+        if (distanceSquared < innerRadiusSquared || distanceSquared > outerRadiusSquared) return;
+        const r = Math.sqrt(distanceSquared), edge = Math.abs(r - radius);
         const impact = (1 - edge / 24) * fade * pulse.strength;
         p.energy = Math.max(p.energy, impact); p.vx += dx / Math.max(r, 1) * impact * dt * 720;
         p.vy += dy / Math.max(r, 1) * impact * dt * 720; p.spin += impact * dt * 22; active.add(index);
@@ -259,7 +281,7 @@ export function mountLagosField(root: HTMLElement): () => void {
       p.vx += (-p.ox * 115 - p.vx * 12) * dt; p.vy += (-p.oy * 115 - p.vy * 12) * dt;
       p.ox = clamp(p.ox + p.vx * dt, -45, 45); p.oy = clamp(p.oy + p.vy * dt, -45, 45);
       p.spin += (-p.angle * 42 - p.spin * 9) * dt; p.angle += p.spin * dt;
-      p.energy *= Math.exp(-dt * 2.1);
+      p.energy *= energyDecay;
       // Restore the cached map when the green highlight ends, avoiding a pale afterglow.
       if (p.energy < .08) {
         p.ox = p.oy = p.vx = p.vy = p.angle = p.spin = p.energy = 0; active.delete(index);
@@ -267,7 +289,7 @@ export function mountLagosField(root: HTMLElement): () => void {
     }
     sparks = sparks.filter(spark => {
       spark.life -= dt * .9; spark.x += spark.vx * dt; spark.y += spark.vy * dt;
-      spark.vx *= Math.exp(-dt * 3); spark.vy *= Math.exp(-dt * 3); spark.angle += dt * .8;
+      spark.vx *= sparkDrag; spark.vy *= sparkDrag; spark.angle += dt * .8;
       return spark.life > 0;
     });
     render();
@@ -295,10 +317,11 @@ export function mountLagosField(root: HTMLElement): () => void {
   const isControl = (target: EventTarget | null) => target instanceof Element && !!target.closest('a, button, input, textarea, select, [data-no-terrain]');
   function samplePointer(event: PointerEvent) {
     const bounds = root.getBoundingClientRect(), x = event.clientX - bounds.left, y = event.clientY - bounds.top;
-    if (performance.now() - lastCoordinateUpdate > 90) {
+    const now = performance.now();
+    if (now - lastCoordinateUpdate > 90) {
       const u = (x - map.left) / map.width, v = (y - map.top) / map.height;
       if (u >= 0 && u <= 1 && v >= 0 && v <= 1) coordinateLabel.textContent = `${(LAGOS_BOUNDS.north - v * (LAGOS_BOUNDS.north - LAGOS_BOUNDS.south)).toFixed(4)}° N / ${(LAGOS_BOUNDS.west + u * (LAGOS_BOUNDS.east - LAGOS_BOUNDS.west)).toFixed(4)}° E`;
-      lastCoordinateUpdate = performance.now();
+      lastCoordinateUpdate = now;
     }
     if (paused || reducedMotion.matches) return;
     const last = samples[samples.length - 1] ?? previousSample;
@@ -306,11 +329,12 @@ export function mountLagosField(root: HTMLElement): () => void {
     samples.push({ x, y, down, time }); if (samples.length > 16) samples.shift(); wake();
   }
   root.addEventListener('pointermove', event => {
+    if (pointerId !== null && event.pointerId !== pointerId) return;
     if (isControl(event.target) || (event.pointerType === 'touch' && !down)) { previousSample = null; return; }
     samplePointer(event);
   }, { signal, passive: true });
   root.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || isControl(event.target)) return;
+    if (pointerId !== null || event.button !== 0 || isControl(event.target)) return;
     // A map gesture should not start native text selection after repeated clicks.
     event.preventDefault();
     if (paused || reducedMotion.matches) return;
@@ -323,8 +347,12 @@ export function mountLagosField(root: HTMLElement): () => void {
     addPulse(event.clientX - bounds.left, event.clientY - bounds.top, dragDistance > 8 ? .55 : 1.1);
     endDrag(); previousSample = null;
   }, { signal });
-  root.addEventListener('pointercancel', () => { endDrag(); previousSample = null; }, { signal });
-  root.addEventListener('lostpointercapture', () => { down = false; pointerId = null; root.dataset.drawing = 'false'; }, { signal });
+  root.addEventListener('pointercancel', event => {
+    if (event.pointerId === pointerId) { endDrag(); previousSample = null; }
+  }, { signal });
+  root.addEventListener('lostpointercapture', event => {
+    if (event.pointerId === pointerId) { down = false; pointerId = null; previousSample = null; root.dataset.drawing = 'false'; }
+  }, { signal });
   root.addEventListener('pointerleave', () => { if (!down) previousSample = null; }, { signal });
   window.addEventListener('blur', () => { endDrag(); previousSample = null; }, { signal });
   themeButton.addEventListener('click', () => { endDrag(); resetField(); dark = !dark; setPalette(); cacheMap(); }, { signal });
