@@ -8,7 +8,7 @@ Pluses, crosses, triangles, and dots replace conventional map fills and contour 
 Requires Node 22.22+ and pnpm 12.14.0 (pinned in `package.json`). Install the locked dependencies with
 `pnpm install --frozen-lockfile`, then run `pnpm dev`. `pnpm build` produces
 the static site in `dist/`; `pnpm preview` serves that build locally.
-Run `pnpm check` for Astro and TypeScript diagnostics and `pnpm test` for intro-rotation tests. Commit `pnpm-lock.yaml`
+Run `pnpm check` for Astro and TypeScript diagnostics. Commit `pnpm-lock.yaml`
 with dependency changes; pnpm is the package manager for this repository.
 
 Vercel Web Analytics and Speed Insights use their Astro components in the shared
