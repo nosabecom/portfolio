@@ -1,0 +1,3 @@
+- A little corner of the internet.
+- Things I’m making, and things I’m thinking about.
+- Notes, projects, and a little curiosity.

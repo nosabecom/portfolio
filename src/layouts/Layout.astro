@@ -1,5 +1,6 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import identityFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 interface Props { title?: string; description?: string; }
 const {
   title = 'Nosa Omokaro — Portfolio',
@@ -11,6 +12,7 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
+    <link rel="preload" href={identityFont} as="font" type="font/woff2" crossorigin="anonymous" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
@@ -35,6 +37,9 @@ const {
 </script>
 <style is:global>
   @import "tailwindcss";
+  @font-face { font-family: 'Inter Identity'; src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2'); font-style: normal; font-weight: 100 900; font-display: swap; }
+  .identity-name { font-family: 'Inter Identity', Arial, sans-serif; font-synthesis: none; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   :root { --paper: #f2f0e6; --ink: #233f33; --muted: #586c60; --accent: #557a24; --line: #233f3326; color-scheme: light; }
   :root[data-theme='dark'] { --paper: #0b1110; --ink: #eef2df; --muted: #9eb0a2; --accent: #b9ef87; --line: #b6d0b52e; color-scheme: dark; }
   html, body { margin: 0; width: 100%; min-height: 100%; background: var(--paper); color: var(--ink); font-family: Arial, Helvetica, sans-serif; }

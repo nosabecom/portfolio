@@ -1,0 +1,24 @@
+---
+import { Content as IntroOptions } from '../content/profile-intros.md';
+---
+<random-intro class="profile-intro"><IntroOptions /></random-intro>
+<script>
+  class RandomIntro extends HTMLElement {
+    connectedCallback() {
+      const list = this.querySelector('ul');
+      if (!list || list.children.length === 0) return;
+      const options = Array.from(list.children);
+      list.replaceChildren(options[Math.floor(Math.random() * options.length)]);
+    }
+  }
+  if (!customElements.get('random-intro')) customElements.define('random-intro', RandomIntro);
+</script>
+<style>
+  .profile-intro { display: block; max-width: 32ch; min-height: 3.4em; color: var(--muted); font-size: 14px; line-height: 1.7; text-wrap: balance; }
+  .profile-intro :global(ul) { margin: 0; padding: 0; list-style: none; }
+  .profile-intro :global(li) { display: none; }
+  .profile-intro :global(li:first-child) { display: block; }
+  .profile-intro :global(p) { margin: 0; }
+  .profile-intro :global(a) { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 600px) { .profile-intro { font-size: 13px; max-width: 29ch; } }
+</style>

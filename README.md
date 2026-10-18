@@ -22,7 +22,7 @@ with dependency changes; pnpm is the package manager for this repository.
 
 The geographic land/water boundaries are sourced from OpenStreetMap; the
 contour-like texture is generative art, not measured elevation. No map API,
-external font, or runtime network request is required for the background.
+external font service, or runtime network request is required for the background.
 
 Move to leave a fine trail; hold and drag for a wider brush with stronger motion.
 Release to send out a pulse. Touch drawing is confined to the map surface, leaving
@@ -34,6 +34,18 @@ changed canvas tiles are restored. Vector paths are grouped by color and opacity
 frames stop when the bounded particles and pulses settle. No animation framework
 or runtime dependency is needed.
 The bottom-right theme button switches between dark green and paper palettes. Decorative labels do not select while drawing; foreground links and controls remain interactive.
+
+## Homepage introduction
+
+Edit `src/content/profile-intros.md`: each top-level Markdown bullet is one possible
+line below the name. Add as many as you like. One is chosen randomly each time the
+homepage opens, including when returning through site navigation; it stays still
+while you read. Markdown emphasis and links work. Without JavaScript, the first
+line is shown. Keep options short (one or two lines on a phone) and rebuild/deploy
+to publish changes. The included lines are placeholders you can replace.
+
+The name uses a locally bundled Inter variable font on the homepage and section
+headers so its glyphs and weight do not depend on fonts installed on the device.
 
 ## Writing and projects
 
