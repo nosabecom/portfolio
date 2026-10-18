@@ -22,6 +22,7 @@ const {
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
+    <a class="map-credit" data-no-terrain href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data © OpenStreetMap contributors</a>
     <slot />
   </body>
 </html>
@@ -45,6 +46,9 @@ const {
   html, body { margin: 0; width: 100%; min-height: 100%; background: var(--paper); color: var(--ink); font-family: Arial, Helvetica, sans-serif; }
   a, button { touch-action: manipulation; }
   a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+  .map-credit { position: fixed; z-index: 3; top: 44px; right: 44px; color: #48564e; font: 8px/1.5 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; white-space: nowrap; text-decoration: none; user-select: none; }
+  .map-credit:hover { text-decoration: underline; }
+  @media (max-width: 600px) { .map-credit { top: 30px; right: 24px; font-size: 7px; } }
   .skip-link { position: fixed; top: 8px; left: 8px; z-index: 10; padding: 12px; color: var(--ink); background: var(--paper); transform: translateY(-200%); }
   .skip-link:focus { transform: translateY(0); }
   @keyframes content-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }

@@ -8,7 +8,7 @@ Pluses, crosses, triangles, and dots replace conventional map fills and contour 
 Requires Node 22.12+ and pnpm 11.17.0 (pinned in `package.json`). Install the locked dependencies with
 `pnpm install --frozen-lockfile`, then run `pnpm dev`. `pnpm build` produces
 the static site in `dist/`; `pnpm preview` serves that build locally.
-Run `pnpm check` for Astro and TypeScript diagnostics. Commit `pnpm-lock.yaml`
+Run `pnpm check` for Astro and TypeScript diagnostics and `pnpm test` for intro-rotation tests. Commit `pnpm-lock.yaml`
 with dependency changes; pnpm is the package manager for this repository.
 
 ## Background
@@ -33,16 +33,27 @@ The resting field is cached. A spatial grid limits interaction queries, and only
 changed canvas tiles are restored. Vector paths are grouped by color and opacity;
 frames stop when the bounded particles and pulses settle. No animation framework
 or runtime dependency is needed.
-The bottom-right theme button switches between dark green and paper palettes. Decorative labels do not select while drawing; foreground links and controls remain interactive.
+The bottom-right theme button switches between dark green and paper palettes.
+OpenStreetMap attribution stays at the top right, opposite the coordinates. Decorative labels do not select while drawing; foreground links and controls remain interactive.
 
 ## Homepage introduction
 
 Edit `src/content/profile-intros.md`: each top-level Markdown bullet is one possible
-line below the name. Add as many as you like. One is chosen randomly each time the
-homepage opens, including when returning through site navigation; it stays still
-while you read. Markdown emphasis and links work. Without JavaScript, the first
+line below the name. Add as many as you like (100+ are supported). Each browser
+remembers which intros it has seen in local storage. Every distinct,
+non-empty line is shown once before a new random round starts, including visits
+through site navigation. The last intro of a round cannot immediately repeat at
+the start of the next (unless only one intro exists). The selected line stays
+still while you read. New lines join the unseen pool; reordering and removing
+lines preserve progress. Duplicate text and empty bullets are ignored.
+
+History is local to the browser and origin, so different browsers/devices start
+independently. Clearing site storage resets progress. If storage is blocked,
+rotation still works during client navigation but cannot persist across reloads.
+Markdown emphasis and links work. Without JavaScript, the first
 line is shown. Keep options short (one or two lines on a phone) and rebuild/deploy
-to publish changes. The included lines are placeholders you can replace.
+to publish changes. The current batch is the owner’s writing; add more bullets
+to grow the collection.
 
 The name uses a locally bundled Inter variable font on the homepage and section
 headers so its glyphs and weight do not depend on fonts installed on the device.
@@ -74,11 +85,14 @@ alt text and image dimensions. The page already supplies the title, so start bod
 headings at `##`.
 
 Set `draft: false` (or omit it) to publish. Drafts have **no public route** and do
-not appear in lists, including in development. `first-note.md` is an unpublished
-starter to replace with your own writing. A published sample, `a-little-room-for-curiosity.md`,
-is included for testing the reading layout. The portfolio case study is also sample
-copy, with local screenshots in `public/images/lagos/`. Replace or remove these
-samples when your real content is ready.
+not appear in lists, including in development. The two sample fixtures are
+`src/content/writings/test.md` and `src/content/projects/test.md`, both marked
+`draft: true`. The public sections remain empty until you publish real content.
+To inspect a sample, temporarily set its draft flag to false and rebuild, then
+open `/writings/test/` or `/projects/test/`. Restore `draft: true` afterward.
+The samples include images, captions, lists, quotes, code, and a table; local
+screenshots live in `public/images/lagos/`. Copy a sample to a descriptive filename
+and replace its title and content when publishing your own work.
 There is a designed empty state when a collection has no published entries.
 
 Projects accept these additional optional frontmatter fields:

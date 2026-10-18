@@ -2,24 +2,56 @@
 import { Content as IntroOptions } from '../content/profile-intros.md';
 ---
 <random-intro class="profile-intro"><IntroOptions /></random-intro>
+<noscript><style is:inline>random-intro.profile-intro:not([data-ready]) { visibility: visible; }</style></noscript>
 <script>
+  import { introKey, nextIntro, type IntroHistory } from '../lib/intro-cycle';
+
+  const storageKey = 'nosa:intro-history:v1';
+  let memoryHistory: IntroHistory | null = null;
+  let storageUsable = true;
+
+  function loadHistory(): unknown {
+    if (storageUsable) {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          try { return JSON.parse(saved); } catch { return null; }
+        }
+      } catch { storageUsable = false; }
+    }
+    return memoryHistory;
+  }
+
   class RandomIntro extends HTMLElement {
+    private selected = false;
     connectedCallback() {
+      if (this.selected) return;
       const list = this.querySelector('ul');
       if (!list || list.children.length === 0) return;
       const options = Array.from(list.children).filter((option) => option.textContent?.trim());
       if (options.length === 0) return;
-      list.replaceChildren(options[Math.floor(Math.random() * options.length)]);
+      const { intro, history } = nextIntro(options.map((option) => option.textContent ?? ''), loadHistory());
+      const choice = options.find((option) => introKey(option.textContent ?? '') === intro);
+      if (!choice) return;
+      list.replaceChildren(choice);
+      this.selected = true;
+      this.setAttribute('data-ready', '');
+      memoryHistory = history;
+      if (storageUsable) {
+        try { localStorage.setItem(storageKey, JSON.stringify(history)); }
+        catch { storageUsable = false; }
+      }
     }
   }
   if (!customElements.get('random-intro')) customElements.define('random-intro', RandomIntro);
 </script>
 <style>
-  .profile-intro { display: block; width: min(52ch, calc(100vw - 48px)); min-height: 1.7em; color: var(--muted); font-size: 14px; line-height: 1.7; text-wrap: balance; }
+  .profile-intro { display: block; width: min(52ch, calc(100vw - 48px)); min-height: 1.7em; color: var(--muted); font-size: 15px; line-height: 1.7; text-wrap: balance; }
+  .profile-intro:not([data-ready]) { visibility: hidden; }
   .profile-intro :global(ul) { margin: 0; padding: 0; list-style: none; }
   .profile-intro :global(li) { display: none; }
   .profile-intro :global(li:first-child) { display: block; }
   .profile-intro :global(p) { margin: 0; }
   .profile-intro :global(a) { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
-  @media (max-width: 600px) { .profile-intro { font-size: 13px; } }
+  @media (max-width: 600px) { .profile-intro { font-size: 14px; } }
 </style>

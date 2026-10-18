@@ -1,8 +1,8 @@
 ---
-title: "A little room for curiosity"
+title: "Test writing: A little room for curiosity"
 description: "A sample note on quiet interfaces, small interactions, and knowing when to leave things alone."
 date: 2026-10-17
-draft: false
+draft: true
 ---
 *Sample writing for testing the reading layout. Replace or remove this piece when your own writing is ready.*
 
@@ -56,10 +56,10 @@ If the page feels good in those quieter moments, the interactive parts have a be
 The publishing side follows the same principle. A small Markdown file is enough to give a piece a title, a summary, and a place on the site:
 
 ```yaml
-title: "A little room for curiosity"
+title: "Test writing: A little room for curiosity"
 description: "A note about making space."
 date: 2026-10-17
-draft: false
+draft: true
 ```
 
 The rest is just writing. A `##` introduces a section; a link connects an idea to another page; an image gives the reader a pause. The layout takes care of the presentation.
@@ -68,4 +68,4 @@ The rest is just writing. A `##` introduces a section; a link connects an idea t
 
 There is more to try here, but it does not all need to happen at once. Sometimes the best next change is the one that gives what is already there a little more room.
 
-For the visual side of this experiment, see [Lagos, in little shapes](/projects/lagos-portfolio/).
+For the visual side of this experiment, see [Lagos, in little shapes](/projects/test/).

@@ -1,7 +1,8 @@
 ---
-title: "Lagos, in little shapes"
+title: "Test project: Lagos, in little shapes"
 description: "Turning a familiar coastline into a small, playable corner of the internet."
 date: 2026-10-17
+draft: true
 featured: true
 preview:
   src: "/images/lagos/dark-desktop.png"
@@ -68,4 +69,4 @@ The content takes a different approach: ordinary Markdown files become static pa
 
 This is a foundation for a portfolio that can grow one piece at a time. The next test is simple: add real writing, add real projects, and see whether the background still knows when to be quiet.
 
-Read the companion sample, [A little room for curiosity](/writings/a-little-room-for-curiosity/), or [return to the map](/).
+Read the companion sample, [A little room for curiosity](/writings/test/), or [return to the map](/).
