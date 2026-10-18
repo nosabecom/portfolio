@@ -71,7 +71,8 @@ headers so its glyphs and weight do not depend on fonts installed on the device.
 
 The section headings, introductory sentences, and empty-state messages are in
 `src/components/CollectionIndex.astro`. Edit `description` near the top to change
-“Notes, ideas, and things worth writing down.” or the Projects introduction.
+the Writings or Projects introduction. Write `\\` for a literal backslash in these
+JavaScript strings.
 The same description is used for the page metadata. Rebuild/redeploy after editing.
 
 Edit Markdown files in `src/content/writings/` and `src/content/projects/`.
@@ -132,11 +133,25 @@ error. Draft dates do not schedule publication: use `draft` explicitly.
 
 ## Résumé
 
-Set `resumeUrl` in `src/site.config.ts` to the stable URL of your GitHub PDF.
-The same Résumé link appears on the homepage and section navigation, and opens
-in a new tab. Updating the PDF at that URL does not require editing the site;
-changing the URL requires a rebuild. Until a URL is supplied, Résumé remains a
-non-clickable placeholder.
+`/resume/` embeds the PDF with PDF.js, including selectable text, PDF links,
+page navigation, zoom, fit-to-width, and a download button in the viewer toolbar.
+The PDF viewer and worker load only when visiting this page. Leaving it releases
+the document, worker, resize observer, and download URL. Loading failures show
+a retry button; the download remains available without JavaScript.
+
+The source is `build/resume.pdf` on the private `nosabecom/jobs` repo's
+`production` branch. Its `sync-portfolio-resume.yml` GitHub Actions workflow runs
+when that file changes on `production`, validates it, and copies only the PDF
+to `resume.pdf` on this repo's public `resume-pdf` branch. Identical files do not
+create another commit. A repository deploy key is stored in the jobs repo's
+`PORTFOLIO_RESUME_DEPLOY_KEY` Actions secret; no credentials go to the browser.
+The assets branch disables Vercel deployments and does not touch protected `main`.
+
+To update the résumé, commit the finished PDF to `jobs/production` and push.
+The viewer requests the current published file on its next visit; no portfolio
+rebuild is needed. Download uses the same bytes as the displayed document.
+`resumePdfUrl` in `src/site.config.ts` controls the asset location, and `resumeUrl`
+points navigation to the internal viewer. Changing those settings needs a rebuild.
 
 ## Navigation and themes
 

@@ -1,6 +1,6 @@
-// Use the stable URL of the PDF on GitHub (or a raw.githubusercontent.com URL).
-// Keep null until the résumé is ready; no broken link is rendered.
-export const resumeUrl: string | null = null;
+// jobs/production publishes its finished PDF to this public assets branch.
+export const resumePdfUrl = 'https://raw.githubusercontent.com/nosabecom/portfolio/resume-pdf/resume.pdf';
+export const resumeUrl = '/resume/';
 
 export const profileLinks = [
   { label: 'Writings', href: '/writings/' },

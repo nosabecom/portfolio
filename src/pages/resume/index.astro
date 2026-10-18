@@ -1,0 +1,13 @@
+---
+import SectionLayout from '../../layouts/SectionLayout.astro';
+import ResumeViewer from '../../components/ResumeViewer.astro';
+---
+<SectionLayout title="Résumé" description="Nosa Omokaro’s résumé. Read it here or download the PDF.">
+  <div class="section-intro resume-intro">
+    <h1>Résumé<span class="accent">.</span></h1>
+  </div>
+  <ResumeViewer />
+</SectionLayout>
+<style>
+  .resume-intro { margin-bottom: 24px; }
+</style>

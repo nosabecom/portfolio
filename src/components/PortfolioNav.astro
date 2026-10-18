@@ -4,7 +4,7 @@ import { profileLinks } from '../site.config';
 <nav class="profile-nav" aria-label="Portfolio">
   <ul>
     {profileLinks.map(({ label, href }) => (
-      <li>{href ? <a href={href} aria-current={Astro.url.pathname.startsWith(href) ? 'page' : undefined} target={label === 'Résumé' ? '_blank' : undefined} rel={label === 'Résumé' ? 'noopener noreferrer' : undefined} aria-label={label === 'Résumé' ? 'Résumé (PDF, opens in a new tab)' : undefined}>{label}</a> : <span role="link" aria-disabled="true" title="Résumé coming soon">{label}</span>}</li>
+      <li>{href ? <a href={href} aria-current={Astro.url.pathname.startsWith(href) ? 'page' : undefined}>{label}</a> : <span role="link" aria-disabled="true" title="Résumé coming soon">{label}</span>}</li>
     ))}
   </ul>
 </nav>
