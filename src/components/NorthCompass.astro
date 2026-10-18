@@ -1,0 +1,55 @@
+<north-compass class="north" data-no-terrain>
+  <button class="north-name" type="button" aria-live="polite">N</button>
+  <button class="north-arrow" type="button" aria-label="Spin compass">
+    <svg viewBox="0 0 16 32" fill="none" aria-hidden="true"><path d="M8 29V4M3 10l5-6 5 6" stroke="currentColor" stroke-width="1"/></svg>
+  </button>
+</north-compass>
+
+<script>
+  class NorthCompass extends HTMLElement {
+    private events?: AbortController;
+    private resetName?: ReturnType<typeof setTimeout>;
+    private spin?: Animation;
+
+    connectedCallback() {
+      if (this.events) return;
+      this.events = new AbortController();
+      const { signal } = this.events;
+      const name = this.querySelector<HTMLButtonElement>('.north-name')!;
+      const arrow = this.querySelector<SVGElement>('svg')!;
+      name.addEventListener('click', () => {
+        clearTimeout(this.resetName);
+        name.textContent = 'Nosa';
+        this.resetName = setTimeout(() => { name.textContent = 'N'; }, 1800);
+      }, { signal });
+      this.querySelector('.north-arrow')!.addEventListener('click', () => {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches || this.spin?.playState === 'running') return;
+        this.spin?.cancel();
+        this.spin = arrow.animate(
+          [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
+          { duration: 800, easing: 'cubic-bezier(.22, .8, .2, 1)' },
+        );
+      }, { signal });
+    }
+
+    disconnectedCallback() {
+      this.events?.abort();
+      this.events = undefined;
+      clearTimeout(this.resetName);
+      this.spin?.cancel();
+      this.querySelector('.north-name')!.textContent = 'N';
+    }
+  }
+
+  if (!customElements.get('north-compass')) customElements.define('north-compass', NorthCompass);
+</script>
+
+<style>
+  .north { position: fixed; z-index: 3; display: flex; flex-direction: column; align-items: center; top: 104px; right: 30px; font: 10px/1.2 SFMono-Regular, Consolas, "Liberation Mono", monospace; color: var(--accent); user-select: none; }
+  button { display: grid; place-items: center; width: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+  .north-name { height: 24px; }
+  .north-arrow { height: 44px; }
+  svg { width: 16px; height: 32px; transform-origin: center; }
+  @media (max-width: 600px) { .north { top: 94px; right: 10px; } .north-name { height: 44px; } }
+  @media (max-height: 620px) and (min-width: 601px) { .north { top: 84px; } }
+</style>

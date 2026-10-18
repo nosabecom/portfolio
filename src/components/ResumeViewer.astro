@@ -1,0 +1,212 @@
+---
+import { resumePdfUrl } from '../site.config';
+---
+<resume-viewer data-pdf-url={resumePdfUrl}>
+  <div class="pdf-toolbar" role="toolbar" aria-label="PDF controls">
+    <div class="pdf-controls">
+      <button type="button" data-previous aria-label="Previous page" hidden disabled>‹</button>
+      <span data-page-status aria-live="polite">— / —</span>
+      <button type="button" data-next aria-label="Next page" hidden disabled>›</button>
+    </div>
+    <div class="pdf-tools">
+      <div class="pdf-controls">
+        <button type="button" data-zoom-out aria-label="Zoom out" disabled>−</button>
+        <button type="button" class="pdf-fit" data-fit aria-label="Fit PDF to width" disabled>Fit width</button>
+        <button type="button" data-zoom-in aria-label="Zoom in" disabled>+</button>
+      </div>
+      <a class="pdf-download" data-download href={resumePdfUrl} download="Nosa-Omokaro-Resume.pdf" aria-label="Download résumé PDF" title="Download PDF">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v11m-4-4 4 4 4-4M3 13v4h14v-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+  <div class="pdf-frame">
+    <div class="pdf-container" tabindex="0" role="region" aria-label="Résumé PDF">
+      <div class="pdfViewer"></div>
+    </div>
+    <div class="pdf-message">
+      <p data-status role="status">Loading résumé…</p>
+      <button type="button" data-retry hidden>Try again</button>
+    </div>
+  </div>
+  <noscript>
+    <style is:inline>resume-viewer .pdf-controls, resume-viewer .pdf-frame { display: none; }</style>
+    <p class="pdf-fallback">JavaScript is needed for the embedded viewer. Use the download button above to read the PDF.</p>
+  </noscript>
+</resume-viewer>
+
+<script>
+  import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+  import 'pdfjs-dist/web/pdf_viewer.css';
+  import type { PDFDocumentLoadingTask } from 'pdfjs-dist';
+  import type { PDFViewer } from 'pdfjs-dist/web/pdf_viewer.mjs';
+
+  class ResumeViewer extends HTMLElement {
+    private events?: AbortController;
+    private renderEvents?: AbortController;
+    private observer?: ResizeObserver;
+    private task?: PDFDocumentLoadingTask;
+    private viewer?: PDFViewer;
+    private downloadUrl?: string;
+
+    connectedCallback() {
+      if (this.events) return;
+      this.events = new AbortController();
+      void this.load(this.events.signal);
+    }
+
+    private async fetchPdf(signal: AbortSignal) {
+      // Each visit requests the latest published file rather than a stale branch URL.
+      const url = new URL(this.dataset.pdfUrl!);
+      url.searchParams.set('updated', String(Date.now()));
+      const response = await fetch(url, { signal, cache: 'no-store' });
+      if (!response.ok) throw new Error(`PDF request failed: ${response.status}`);
+      const data = await response.arrayBuffer();
+      if (new TextDecoder().decode(data.slice(0, 5)) !== '%PDF-') throw new Error('Invalid PDF response');
+      return data;
+    }
+
+    private async load(lifecycleSignal: AbortSignal) {
+      this.renderEvents = new AbortController();
+      const signal = AbortSignal.any([lifecycleSignal, this.renderEvents.signal]);
+      const status = this.querySelector<HTMLElement>('[data-status]')!;
+      const retry = this.querySelector<HTMLButtonElement>('[data-retry]')!;
+      const download = this.querySelector<HTMLAnchorElement>('[data-download]')!;
+      const container = this.querySelector<HTMLDivElement>('.pdf-container')!;
+      const buttons = this.querySelectorAll<HTMLButtonElement>('.pdf-toolbar button');
+      this.removeAttribute('data-ready');
+      retry.hidden = true;
+      status.textContent = 'Loading résumé…';
+      this.querySelector('[data-page-status]')!.textContent = '— / —';
+      this.querySelectorAll<HTMLButtonElement>('[data-previous], [data-next]').forEach(button => { button.hidden = true; });
+      download.href = this.dataset.pdfUrl!;
+      buttons.forEach(button => { button.disabled = true; });
+      retry.addEventListener('click', () => { this.disconnectedCallback(); this.connectedCallback(); }, { signal: lifecycleSignal });
+
+      try {
+        // Fetch the PDF alongside the lazy modules instead of chaining three downloads.
+        const modules = import('pdfjs-dist').then(async core => ({
+          core,
+          // The viewer module uses the core module's global exports; load it second.
+          viewer: await import('pdfjs-dist/web/pdf_viewer.mjs'),
+        }));
+        const [data, { core, viewer: components }] = await Promise.all([this.fetchPdf(signal), modules]);
+        if (signal.aborted) return;
+        const { getDocument, GlobalWorkerOptions, AnnotationEditorType } = core;
+        const { EventBus, PDFLinkService, PDFViewer } = components;
+        GlobalWorkerOptions.workerSrc = workerUrl;
+        this.downloadUrl = URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+        download.href = this.downloadUrl;
+
+        const bus = new EventBus();
+        const links = new PDFLinkService({ eventBus: bus, externalLinkTarget: 2, externalLinkRel: 'noopener noreferrer' });
+        const viewerOptions = {
+          container,
+          eventBus: bus,
+          linkService: links,
+          removePageBorders: true,
+          maxCanvasPixels: 8_000_000,
+          annotationEditorMode: AnnotationEditorType.DISABLE,
+          // PDF.js also owns resize, scroll, and selection listeners.
+          abortSignal: signal,
+        };
+        const viewer = this.viewer = new PDFViewer(viewerOptions);
+        links.setViewer(viewer);
+        const previous = this.querySelector<HTMLButtonElement>('[data-previous]')!;
+        const next = this.querySelector<HTMLButtonElement>('[data-next]')!;
+        const zoomOut = this.querySelector<HTMLButtonElement>('[data-zoom-out]')!;
+        const zoomIn = this.querySelector<HTMLButtonElement>('[data-zoom-in]')!;
+        const updateControls = () => {
+          this.querySelector('[data-page-status]')!.textContent = `${viewer.currentPageNumber} / ${viewer.pagesCount}`;
+          previous.disabled = viewer.currentPageNumber <= 1;
+          next.disabled = viewer.currentPageNumber >= viewer.pagesCount;
+          previous.hidden = next.hidden = viewer.pagesCount === 1;
+          zoomOut.disabled = viewer.currentScale <= .25;
+          zoomIn.disabled = viewer.currentScale >= 3;
+        };
+        bus.on('pagesinit', () => {
+          viewer.currentScaleValue = 'page-width';
+          buttons.forEach(button => { button.disabled = false; });
+          updateControls();
+          status.textContent = 'Résumé loaded.';
+          this.setAttribute('data-ready', '');
+        }, { signal });
+        bus.on('pagechanging', updateControls, { signal });
+        bus.on('scalechanging', updateControls, { signal });
+        previous.addEventListener('click', () => { viewer.currentPageNumber--; }, { signal });
+        next.addEventListener('click', () => { viewer.currentPageNumber++; }, { signal });
+        zoomOut.addEventListener('click', () => { viewer.currentScale = Math.max(.25, viewer.currentScale / 1.2); }, { signal });
+        zoomIn.addEventListener('click', () => { viewer.currentScale = Math.min(3, viewer.currentScale * 1.2); }, { signal });
+        this.querySelector('[data-fit]')!.addEventListener('click', () => { viewer.currentScaleValue = 'page-width'; }, { signal });
+        let lastWidth = container.clientWidth;
+        this.observer = new ResizeObserver(() => {
+          if (container.clientWidth !== lastWidth) {
+            lastWidth = container.clientWidth;
+            if (viewer.currentScaleValue === 'page-width') viewer.currentScaleValue = 'page-width';
+          }
+        });
+        this.observer.observe(container);
+        this.task = getDocument({ data: new Uint8Array(data) });
+        const document = await this.task.promise;
+        if (signal.aborted) return;
+        links.setDocument(document);
+        viewer.setDocument(document);
+        // setDocument initializes pages asynchronously; surface those failures too.
+        await viewer.pagesPromise;
+      } catch (error) {
+        if (lifecycleSignal.aborted) return;
+        this.releaseResources();
+        this.removeAttribute('data-ready');
+        download.href = this.dataset.pdfUrl!;
+        buttons.forEach(button => { button.disabled = true; });
+        status.textContent = 'Couldn’t load the résumé. Try again or use the download button above.';
+        retry.hidden = false;
+        console.error('Résumé viewer:', error);
+      }
+    }
+
+    private releaseResources() {
+      this.renderEvents?.abort();
+      this.renderEvents = undefined;
+      this.observer?.disconnect();
+      this.observer = undefined;
+      this.viewer?.setDocument(null);
+      void this.viewer?.l10n?.destroy().catch(() => {});
+      this.viewer = undefined;
+      void this.task?.destroy().catch(() => {});
+      this.task = undefined;
+      if (this.downloadUrl) URL.revokeObjectURL(this.downloadUrl);
+      this.downloadUrl = undefined;
+    }
+
+    disconnectedCallback() {
+      this.events?.abort();
+      this.events = undefined;
+      this.releaseResources();
+    }
+  }
+  if (!customElements.get('resume-viewer')) customElements.define('resume-viewer', ResumeViewer);
+</script>
+
+<style>
+  resume-viewer { display: block; }
+  .pdf-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 8px; border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--paper); }
+  .pdf-controls { display: flex; align-items: center; gap: 2px; }
+  .pdf-tools { display: flex; align-items: center; gap: 8px; }
+  .pdf-download { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 4px; color: var(--ink); }
+  .pdf-download svg { width: 18px; height: 18px; }
+  button { display: grid; place-items: center; min-width: 44px; min-height: 44px; padding: 8px; border: 0; border-radius: 4px; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+  button:hover:enabled, .pdf-download:hover { background: color-mix(in srgb, var(--muted) 12%, transparent); }
+  button:disabled { opacity: .3; cursor: default; }
+  button[hidden] { display: none; }
+  .pdf-fit { font-size: 12px; }
+  [data-page-status] { min-width: 46px; text-align: center; font: 11px/1.5 Consolas, monospace; color: var(--muted); }
+  .pdf-frame { position: relative; height: min(75svh, 900px); min-height: 420px; border: 1px solid var(--line); border-radius: 0 0 8px 8px; overflow: hidden; background: color-mix(in srgb, var(--paper) 90%, var(--muted)); }
+  .pdf-container { position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; }
+  .pdf-message { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; background: var(--paper); color: var(--muted); font-size: 14px; }
+  [data-retry][hidden], [data-ready] .pdf-message { display: none; }
+  .pdf-fallback { font-size: 13px; color: var(--muted); }
+  @media (max-width: 600px) {
+    .pdf-toolbar { justify-content: center; }
+    .pdf-fit { font-size: 11px; padding-inline: 4px; }
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+import { Image } from 'astro:assets';
+import profile from '../assets/profile.webp';
+
+interface Props {
+  variant: 'home' | 'header';
+  class?: string;
+}
+
+const { variant, ...attributes } = Astro.props;
+const home = variant === 'home';
+const size = home ? 156 : 36;
+---
+<Image
+  {...attributes}
+  src={profile}
+  alt={home ? 'Nosa Omokaro’s purple profile avatar' : ''}
+  width={size}
+  height={size}
+  widths={home ? [128, 156, 256, 312, 384, 468] : [36, 72, 108]}
+  sizes={home ? '(max-width: 600px) 128px, (max-height: 500px) 96px, 156px' : '36px'}
+  format="webp"
+  quality={85}
+  loading="eager"
+  decoding="async"
+  fetchpriority={home ? 'high' : 'auto'}
+  draggable="false"
+/>

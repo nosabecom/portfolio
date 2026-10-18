@@ -1,0 +1,31 @@
+---
+import SectionLayout from '../layouts/SectionLayout.astro';
+import ProjectPreview from './ProjectPreview.astro';
+import { publishedEntries, entryHref, formatDate } from '../lib/content';
+interface Props { collection: 'writings' | 'projects'; }
+const { collection } = Astro.props;
+const writings = collection === 'writings';
+const title = writings ? 'Writings' : 'Projects';
+const description = writings ? 'stuff I wrote that YOU 🫵 should read (or dont, might be bad ¯\\(ツ)/¯)' : 'prolly EE related, prolly not (pls look 🥺)';
+const entries = await publishedEntries(collection);
+---
+<SectionLayout title={title} description={description}>
+  <div class="section-intro">
+    <h1>{title}<span class="accent">.</span></h1>
+    <p class="lede">{description}</p>
+  </div>
+  {entries.length ? <ul class="entry-list">
+    {entries.map((entry) => <li>
+      <a class:list={['entry-link', { 'writing-entry': writings, 'project-entry': !writings, 'has-preview': entry.collection === 'projects' && !!entry.data.preview }]} href={entryHref(collection, entry.id)}>
+        {writings && <div class="entry-meta"><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time></div>}
+        {entry.collection === 'projects' && entry.data.preview && <ProjectPreview preview={entry.data.preview} />}
+        <div class="entry-copy"><h2>{entry.data.title}</h2><p>{entry.data.description}</p>{writings && entry.data.tags.length > 0 && <div class="tags">{entry.data.tags.map(tag => <span>{tag}</span>)}</div>}</div>
+        <span class="entry-arrow" aria-hidden="true">↗</span>
+      </a>
+    </li>)}
+  </ul> : <div class="empty-state centered">
+    <span class="empty-mark" aria-hidden="true">✳</span>
+    <h2>{writings ? 'A little quiet here, for now.' : 'More work on the way.'}</h2>
+    <a class="text-link" href="/">Back to the map <span aria-hidden="true">↗</span></a>
+  </div>}
+</SectionLayout>

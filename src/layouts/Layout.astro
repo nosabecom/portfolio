@@ -1,26 +1,66 @@
 ---
-import Road from "../assets/road.png"
+import { ClientRouter } from 'astro:transitions';
+import Analytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
+import NorthCompass from '../components/NorthCompass.astro';
+import identityFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+interface Props { title?: string; description?: string; }
+const {
+  title = 'Nosa Omokaro — Portfolio',
+  description = "Nosa's corner of the internet. An interactive study of Lagos, drawn in little shapes.",
+} = Astro.props;
 ---
 <!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/png" href={Road.src} />
-		<meta name="generator" content={Astro.generator} />
-		<title>Under Construction</title>
-	</head>
-	<body class="bg-black">
-		<slot />
-	</body>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href={identityFont} as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0b1110" />
+    <title>{title}</title>
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <a class="map-credit" data-no-terrain href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data © OpenStreetMap contributors</a>
+    <slot />
+    <NorthCompass />
+    <Analytics />
+    <SpeedInsights />
+  </body>
 </html>
-
+<script>
+  import type { TransitionBeforeSwapEvent } from 'astro:transitions/client';
+  document.addEventListener('astro:before-swap', (event) => {
+    const { newDocument } = event as TransitionBeforeSwapEvent;
+    const theme = document.documentElement.dataset.theme ?? 'dark';
+    newDocument.documentElement.dataset.theme = theme;
+    newDocument.querySelector('lagos-background')?.setAttribute('data-theme', theme);
+    newDocument.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0b1110' : '#f2f0e6');
+  });
+</script>
 <style is:global>
-	@import "tailwindcss";
-
-	html, body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
+  @import "tailwindcss";
+  @font-face { font-family: 'Inter Identity'; src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2'); font-style: normal; font-weight: 100 900; font-display: swap; }
+  .identity-name { font-family: 'Inter Identity', Arial, sans-serif; font-synthesis: none; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  :root { --paper: #f2f0e6; --ink: #233f33; --muted: #586c60; --accent: #557a24; --line: #233f3326; color-scheme: light; }
+  :root[data-theme='dark'] { --paper: #0b1110; --ink: #eef2df; --muted: #9eb0a2; --accent: #b9ef87; --line: #b6d0b52e; color-scheme: dark; }
+  html, body { margin: 0; width: 100%; min-height: 100%; background: var(--paper); color: var(--ink); font-family: Arial, Helvetica, sans-serif; }
+  a, button { touch-action: manipulation; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+  .map-credit { position: fixed; z-index: 3; top: 44px; right: 44px; color: #48564e; font: 8px/1.5 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; white-space: nowrap; text-decoration: none; user-select: none; }
+  .map-credit:hover { text-decoration: underline; }
+  @media (max-width: 600px) { .map-credit { top: 30px; right: 24px; font-size: 7px; } }
+  .skip-link { position: fixed; top: 8px; left: 8px; z-index: 10; padding: 12px; color: var(--ink); background: var(--paper); transform: translateY(-200%); }
+  .skip-link:focus { transform: translateY(0); }
+  @keyframes content-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes content-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+  ::view-transition-group(*) { animation-duration: 280ms; }
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  }
 </style>

@@ -1,28 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "astro",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
   "redirects": [
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "t3.nosa.dev"
-        }
-      ],
-      "destination": "https://nosa.tail3123d8.ts.net/",
-      "permanent": false
-    },
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "t3.nosa.dev"
-        }
-      ],
-      "destination": "https://nosa.tail3123d8.ts.net/:path*",
-      "permanent": false
-    },
     {
       "source": "/secretkey",
       "destination": "https://dustebin.com/qhg3EOXJ.css",
