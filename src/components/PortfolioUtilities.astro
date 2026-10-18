@@ -49,11 +49,12 @@ const socialLinks: { label: string; href: string | null; path: string }[] = [
   a { color: inherit; text-decoration: none; }
   .social-links, .map-utilities { user-select: none; }
   @media (max-width: 600px) {
-    .portfolio-utilities { align-items: stretch; flex-direction: column; padding: 18px 12px; gap: 8px; }
-    .floating { padding: 0; }
-    .floating .social-links { left: 10px; bottom: 74px; }
-    .floating .map-utilities { right: 12px; bottom: 18px; }
-    .map-utilities { justify-content: flex-end; gap: 6px; }
-    .map-credit { font-size: 7px; }
+    .portfolio-utilities { display: grid; grid-template-columns: 1fr 44px; align-items: center; padding: 12px 20px calc(16px + env(safe-area-inset-bottom)); gap: 4px 12px; }
+    .floating { position: absolute; left: 20px; right: 20px; bottom: calc(16px + env(safe-area-inset-bottom)); padding: 0; }
+    .floating .social-links, .floating .map-utilities { position: static; }
+    .social-links { grid-column: 1; grid-row: 1; gap: 0; margin-left: -12px; }
+    .map-utilities { display: contents; }
+    .theme-button { grid-column: 2; grid-row: 1; }
+    .map-credit { grid-column: 1 / -1; grid-row: 2; font-size: 7px; text-align: center; justify-self: center; }
   }
 </style>

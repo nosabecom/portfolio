@@ -62,8 +62,12 @@
   .section-content h1 { letter-spacing: -1.5px; }
   .section-intro { margin-bottom: 36px; }
   .entry-link { grid-template-columns: 1fr 20px; gap: 16px; }
-  .project-entry.has-preview { grid-template-columns: minmax(0, 1fr) 20px; }
-  .project-preview { grid-column: 1 / -1; }
+  .project-entry { gap: 12px; align-items: start; padding: 24px 0; }
+  .project-entry.has-preview { grid-template-columns: minmax(76px, 28%) minmax(0, 1fr) 16px; }
+  .project-preview { aspect-ratio: 4 / 3; border-radius: 6px; }
+  .project-entry .entry-copy h2 { font-size: 18px; line-height: 1.35; margin-bottom: 8px; }
+  .project-entry .entry-copy p { font-size: 12px; line-height: 1.65; }
+  .project-entry .entry-arrow { font-size: 18px; line-height: 1.35; }
   .entry-meta { grid-column: 1 / -1; flex-direction: row; gap: 18px; }
   .entry-copy h2 { font-size: 21px; }
 }

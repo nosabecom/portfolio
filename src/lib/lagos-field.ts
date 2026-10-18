@@ -111,10 +111,15 @@ export function mountLagosField(root: HTMLElement): () => void {
     canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const mobile = width <= 600;
-    const mapWidth = mobile ? width * 1.24 : Math.max(width * .96, Math.min(height * LAGOS_ASPECT_RATIO, width * 1.1));
+    const mapWidth = mobile ? Math.max(width * 1.85, height * LAGOS_ASPECT_RATIO * .82) : Math.max(width * .96, Math.min(height * LAGOS_ASPECT_RATIO, width * 1.1));
     map = { width: mapWidth, height: mapWidth / LAGOS_ASPECT_RATIO, left: (width - mapWidth) / 2, top: 0 };
-    map.top = (height - map.height) * (mobile ? .27 : .43);
+    map.top = (height - map.height) * (mobile ? .4 : .43);
     for (const [key, value] of Object.entries(map)) root.style.setProperty(`--map-${key}`, `${value}px`);
+    root.querySelectorAll<HTMLElement>('.place-label').forEach((label) => {
+      const rect = label.getBoundingClientRect();
+      const clipped = rect.left < bounds.left + 12 || rect.right > bounds.right - 12 || rect.top < bounds.top + 12 || rect.bottom > bounds.bottom - 12;
+      label.style.visibility = mobile && clipped ? 'hidden' : '';
+    });
     spacing = Math.max(mobile ? 7.5 : 9.5, Math.sqrt(width * height / 15500));
     columns = Math.ceil(width / spacing); rows = Math.ceil(height / spacing); tileColumns = Math.ceil(width / TILE);
     points = new Array(columns * rows);

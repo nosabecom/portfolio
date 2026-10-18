@@ -80,9 +80,10 @@ url: "https://example.com"
 repository: "https://github.com/your-name/your-project"
 ```
 
-The preview image appears beside the project summary, or above it on mobile.
+The preview image appears beside the project summary, with a compact thumbnail
+and smaller typography on mobile.
 Use an image under `public/` and its site path, with descriptive alt text. Images
-are displayed at an 8:5 aspect ratio. Without a preview, the summary uses the row;
+are displayed at an 8:5 aspect ratio on desktop and cropped to 4:3 on mobile. Without a preview, the summary uses the row;
 no number or placeholder is shown. `featured` controls sorting without a visible badge.
 
 Omit links you do not have. Writings are sorted newest first; featured projects
