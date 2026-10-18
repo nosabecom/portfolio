@@ -5,9 +5,11 @@ Pluses, crosses, triangles, and dots replace conventional map fills and contour 
 
 ## Development
 
-Requires Node 22.12+ and Bun. Install the locked dependencies with
-`bun install --frozen-lockfile`, then run `bun run dev`. `bun run build` produces
-the static site in `dist/`; `bun run preview` serves that build locally.
+Requires Node 22.12+ and pnpm 11.17.0 (pinned in `package.json`). Install the locked dependencies with
+`pnpm install --frozen-lockfile`, then run `pnpm dev`. `pnpm build` produces
+the static site in `dist/`; `pnpm preview` serves that build locally.
+Run `pnpm check` for Astro and TypeScript diagnostics. Commit `pnpm-lock.yaml`
+with dependency changes; pnpm is the package manager for this repository.
 
 ## Background
 
