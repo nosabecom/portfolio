@@ -1,3 +1,13 @@
-- A little corner of the internet.
-- Things I’m making, and things I’m thinking about.
-- Notes, projects, and a little curiosity.
+- electrical engineering enjoyer
+- "I been on the road for a long time / Tryna get the bread so my family go survive" - Rema
+- I'm on a mad ting
+- Walk in to the spot with all these bands on me
+- building thingies, brb! 🔨
+- future semiconductor eng
+- pls don't make me use linkedin 🥺
+- "She cast her ballot at my polling station till my result early" - @ottawaisms on X
+- discord should slack
+- memory industry never seen ME thats why
+- calling it SI is so dumb
+- why your skin orange? thats the real problem
+- bro why you looking at me so much? go outside nerd
