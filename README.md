@@ -5,11 +5,20 @@ Pluses, crosses, triangles, and dots replace conventional map fills and contour 
 
 ## Development
 
-Requires Node 22.12+ and pnpm 11.17.0 (pinned in `package.json`). Install the locked dependencies with
+Requires Node 22.22+ and pnpm 12.14.0 (pinned in `package.json`). Install the locked dependencies with
 `pnpm install --frozen-lockfile`, then run `pnpm dev`. `pnpm build` produces
 the static site in `dist/`; `pnpm preview` serves that build locally.
 Run `pnpm check` for Astro and TypeScript diagnostics and `pnpm test` for intro-rotation tests. Commit `pnpm-lock.yaml`
 with dependency changes; pnpm is the package manager for this repository.
+
+Vercel Web Analytics and Speed Insights use their Astro components in the shared
+layout, including client-side page transitions. Enable both in the Vercel project's
+dashboard and redeploy to collect data. Their collection endpoints are provided by
+Vercel; the local preview does not collect production metrics. The Vercel project
+has `ENABLE_EXPERIMENTAL_COREPACK=1` in production, preview, and development so
+builds use the pinned pnpm version. `vercel.json` selects Astro, the pnpm install
+and build commands, and the `dist` output directory. TypeScript is pinned to the
+latest 6.x release supported by `@astrojs/check`; its peer range excludes 7.x.
 
 ## Background
 
