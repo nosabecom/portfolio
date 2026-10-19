@@ -20,6 +20,13 @@ const {
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0b1110" />
+    <script is:inline>
+      if (location.pathname === '/' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.setAttribute('data-intro-pending', '');
+        // Keep content available if the animation module cannot load.
+        setTimeout(() => document.documentElement.removeAttribute('data-intro-pending'), 3000);
+      }
+    </script>
     <title>{title}</title>
     <ClientRouter />
   </head>
@@ -50,6 +57,7 @@ const {
   :root { --paper: #f2f0e6; --ink: #233f33; --muted: #586c60; --accent: #557a24; --line: #233f3326; color-scheme: light; }
   :root[data-theme='dark'] { --paper: #0b1110; --ink: #eef2df; --muted: #9eb0a2; --accent: #b9ef87; --line: #b6d0b52e; color-scheme: dark; }
   html, body { margin: 0; width: 100%; min-height: 100%; background: var(--paper); color: var(--ink); font-family: Arial, Helvetica, sans-serif; }
+  html[data-intro-pending] :is(.terrain, .profile, .map-labels, .live-readout, .portfolio-utilities, .map-credit, north-compass) { visibility: hidden; }
   a, button { touch-action: manipulation; }
   a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
   .map-credit { position: fixed; z-index: 3; top: 44px; right: 44px; color: #48564e; font: 8px/1.5 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; white-space: nowrap; text-decoration: none; user-select: none; }

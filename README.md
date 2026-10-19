@@ -42,13 +42,31 @@ The resting field is cached. A spatial grid limits interaction queries, and only
 changed canvas tiles are restored. Vector paths are grouped by color and opacity;
 frames stop when the bounded particles and pulses settle. No animation framework
 or runtime dependency is needed.
-The two canvas buffers share an eight-million-pixel budget (roughly 64 MB of raw
-RGBA pixels), with a maximum device-pixel ratio of two. Compact landscape screens
+Canvas buffers share a budget of roughly 64 MB of raw RGBA pixels, with a maximum
+device-pixel ratio of two. The intro's temporary transparent glyph cache shares
+that budget and is released when the pulse finishes. Compact landscape screens
 place the avatar beside the profile copy so navigation and footer controls fit.
 The bottom-right theme button switches between dark green and paper palettes.
 OpenStreetMap attribution stays at the top right, opposite the coordinates. Decorative labels do not select while drawing; foreground links and controls remain interactive.
 
 ## Homepage introduction
+
+The homepage opens with a three-second light pulse. The background lights up
+steadily from the centre outward, leaving the Lagos map behind it. The name
+then appears, followed by the avatar, intro line, navigation, and corner controls.
+Add `?intro-demo` for a replay button in the app. The control only appears with
+that query parameter.
+The animation runs when entering the homepage; reading pages keep their usual
+background. Skip intro, keyboard focus on the profile, map interaction, resizing,
+and switching tabs finish the opening immediately. Reduced motion shows the
+finished page directly. With JavaScript disabled, profile content remains visible.
+The intro reuses the cached map and a transparent cache of its pluses, crosses,
+triangles, and dots under feathered radial masks. Only the shapes illuminate;
+the space between them stays unchanged. Continuous opacity and gentle acceleration/
+deceleration avoid brightness steps. It does not rebuild particle paths or allocate
+canvas buffers per frame. The name and remaining content use
+overlapping opacity/transform transitions, with no animated blur. Canvas opacity
+stays fixed through the handoff to prevent a full-background flash.
 
 Edit `src/content/profile-intros.md`: each top-level Markdown bullet is one possible
 line below the name. Add as many as you like (100+ are supported). Each browser
