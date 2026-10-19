@@ -1,4 +1,5 @@
 import { isWater, LAGOS_ASPECT_RATIO, LAGOS_BOUNDS } from './lagos-geography';
+import { introLight, mountLagosIntro } from './lagos-intro';
 
 type Particle = {
   x: number; y: number; size: number; alpha: number; shape: number; palette: number;
@@ -9,7 +10,7 @@ type Pulse = { x: number; y: number; start: number; strength: number };
 type Spark = { x: number; y: number; vx: number; vy: number; life: number; size: number; shape: number; angle: number };
 type Batch = { strokes: Path2D; dots: Path2D };
 const TAU = Math.PI * 2, TILE = 112, SHADES = 12;
-// Two RGBA canvases stay below roughly 64 MB, including on large HiDPI screens.
+// RGBA buffers share roughly 64 MB, including the temporary intro glyph cache.
 const MAX_CANVAS_PIXELS = 8_000_000;
 const clamp = (v: number, min = 0, max = 1) => Math.max(min, Math.min(max, v));
 const hash = (x: number, y: number) => {
@@ -30,6 +31,7 @@ function relief(x: number, y: number): number {
 
 export function mountLagosField(root: HTMLElement): () => void {
   const canvas = root.querySelector<HTMLCanvasElement>('canvas')!;
+  const introCanvas = root.querySelector<HTMLCanvasElement>('.intro-glow');
   const context = canvas.getContext('2d', { alpha: false, desynchronized: true });
   if (!context) return () => {};
   const ctx = context;
@@ -48,6 +50,53 @@ export function mountLagosField(root: HTMLElement): () => void {
   let previousSample: Sample | null = null;
   let map = { left: 0, top: 0, width: 1, height: 1 };
   let palette: string[] = [], paper = '';
+  let intro: ReturnType<typeof mountLagosIntro> | undefined;
+  let introSettled = false;
+
+  function clearIntro() {
+    canvas.style.removeProperty('mask-image');
+    if (introCanvas) {
+      introCanvas.hidden = true;
+      introCanvas.width = introCanvas.height = 0;
+      introCanvas.style.removeProperty('mask-image');
+      introCanvas.style.removeProperty('opacity');
+    }
+  }
+
+  function cacheIntroGlyphs() {
+    if (!introCanvas) return;
+    introCanvas.width = canvas.width; introCanvas.height = canvas.height;
+    const pen = introCanvas.getContext('2d');
+    if (!pen) { introCanvas.width = introCanvas.height = 0; return; }
+    pen.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const batches = new Map<number, Batch>();
+    for (const p of points) if (p) glyph(batches, p.shape, p.x, p.y, p.size, 0, 3, p.alpha);
+    paintBatches(pen, batches, true);
+    introCanvas.hidden = false;
+  }
+
+  function renderIntro(progress: number) {
+    if (progress === 0) {
+      cancelAnimationFrame(animation); animation = 0; endDrag(); resetField();
+      introSettled = false;
+      cacheIntroGlyphs();
+    }
+    if (introSettled) return;
+    if (progress >= .64) { clearIntro(); introSettled = true; return; }
+    const radius = Math.hypot(width, height) / 2;
+    const feather = Math.max(width, height) * .18;
+    const light = introLight(progress);
+    const front = Math.max(1, (radius + feather) * light.revealed);
+    const inner = Math.max(0, front - feather);
+    // Soft masks animate cached pixels. Only the transparent glyph layer lights
+    // up; the space between shapes stays paper. No paths are rebuilt per frame.
+    canvas.style.maskImage = progress === 0 ? 'linear-gradient(transparent, transparent)' :
+      `radial-gradient(circle at center, #000 ${inner}px, transparent ${front}px)`;
+    if (introCanvas) {
+      introCanvas.style.maskImage = `radial-gradient(circle at center, transparent ${Math.max(0, front - feather * 1.8)}px, #000 ${Math.max(0, front - feather * .6)}px, transparent ${front}px)`;
+      introCanvas.style.opacity = String(light.glow * (dark ? .65 : .35));
+    }
+  }
 
   function setPalette() {
     paper = dark ? '#0b1110' : '#f2f0e6';
@@ -117,8 +166,10 @@ export function mountLagosField(root: HTMLElement): () => void {
 
   function resize() {
     const bounds = root.getBoundingClientRect();
-    const nextDpr = Math.min(devicePixelRatio || 1, 2, Math.sqrt(MAX_CANVAS_PIXELS / (bounds.width * bounds.height)));
+    const pixelBudget = MAX_CANVAS_PIXELS * (introCanvas ? 2 / 3 : 1);
+    const nextDpr = Math.min(devicePixelRatio || 1, 2, Math.sqrt(pixelBudget / (bounds.width * bounds.height)));
     if (!bounds.width || !bounds.height || (width === bounds.width && height === bounds.height && dpr === nextDpr)) return;
+    intro?.finish();
     resetField(); width = bounds.width; height = bounds.height; dpr = nextDpr;
     canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -323,7 +374,7 @@ export function mountLagosField(root: HTMLElement): () => void {
       if (u >= 0 && u <= 1 && v >= 0 && v <= 1) coordinateLabel.textContent = `${(LAGOS_BOUNDS.north - v * (LAGOS_BOUNDS.north - LAGOS_BOUNDS.south)).toFixed(4)}° N / ${(LAGOS_BOUNDS.west + u * (LAGOS_BOUNDS.east - LAGOS_BOUNDS.west)).toFixed(4)}° E`;
       lastCoordinateUpdate = now;
     }
-    if (paused || reducedMotion.matches) return;
+    if (paused || reducedMotion.matches || root.dataset.introPlaying) return;
     const last = samples[samples.length - 1] ?? previousSample;
     if (down && last) dragDistance += Math.hypot(x - last.x, y - last.y);
     samples.push({ x, y, down, time }); if (samples.length > 16) samples.shift(); wake();
@@ -335,6 +386,7 @@ export function mountLagosField(root: HTMLElement): () => void {
   }, { signal, passive: true });
   root.addEventListener('pointerdown', event => {
     if (pointerId !== null || event.button !== 0 || isControl(event.target)) return;
+    intro?.finish();
     // A map gesture should not start native text selection after repeated clicks.
     event.preventDefault();
     if (paused || reducedMotion.matches) return;
@@ -355,12 +407,13 @@ export function mountLagosField(root: HTMLElement): () => void {
   }, { signal });
   root.addEventListener('pointerleave', () => { if (!down) previousSample = null; }, { signal });
   window.addEventListener('blur', () => { endDrag(); previousSample = null; }, { signal });
-  themeButton.addEventListener('click', () => { endDrag(); resetField(); dark = !dark; setPalette(); cacheMap(); }, { signal });
+  themeButton.addEventListener('click', () => { intro?.finish(); endDrag(); resetField(); dark = !dark; setPalette(); cacheMap(); }, { signal });
   reducedMotion.addEventListener('change', () => { paused = reducedMotion.matches; updateMotion(); }, { signal });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { cancelAnimationFrame(animation); animation = 0; endDrag(); resetField(); }
   }, { signal });
   const observer = new ResizeObserver(resize);
   setPalette(); updateMotion(); resize(); observer.observe(root);
-  return () => { disposed = true; events.abort(); observer.disconnect(); cancelAnimationFrame(animation); endDrag(); };
+  if (!root.hasAttribute('data-content-page')) intro = mountLagosIntro(root, renderIntro, () => { clearIntro(); resetField(); });
+  return () => { disposed = true; intro?.dispose(); events.abort(); observer.disconnect(); cancelAnimationFrame(animation); endDrag(); };
 }
