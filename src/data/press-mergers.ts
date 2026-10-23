@@ -1,11 +1,11 @@
 export const mergedDesigns = [
   {
     id: 'hybrid-pedestal', number: '01', owner: 'Arslan + Althea',
-    name: 'Pedestal compound press', parts: 16, occurrences: 21,
+    name: 'Compound bowl press', parts: 16, occurrences: 21,
     modelingLevel: 'Moderate–high', shapeWork: 'Moderate', assemblyWork: 'Moderate–high',
     modelingNotes: [
-      'Arslan’s broad pedestal supports Althea’s basket, tray and guided compound lever. A 600 mm circular base and a tapered stand raise the collection tray by 150 mm; the post is extended to suit. The pressing plate keeps the same vertical path, with 163.5 mm of travel.',
-      'Most added geometry is a circular extrusion or a revolved taper. The harder work is coordinating the link pivots, square guide and raised basket. The downloads contain editable parts and grounded open/pressed concept assemblies; adding native moving-joint relationships is the next assembly step.',
+      'Arslan’s hemispherical perforated bowl, collection cone and juice spout sit beneath Althea’s compound lever, twin links and guided vertical ram. A matching convex head presses straight into the bowl. The bowl is scaled to 200 mm outside diameter; the head has 163.5 mm of vertical travel.',
+      'The bowl and collector use revolved sections; drainage holes add feature work. The harder step is placing the bowl and matching head so the linkage clears the guide and bowl throughout its stroke. The downloads include editable source parts and grounded open/pressed assemblies. Native moving-joint relationships remain to be added.',
     ],
     preview: 'hybrid-pedestal/preview.webp', sketch: '',
     download: 'Pedestal_Compound_Press_Solid_Edge.zip', file: 'Pedestal_Compound_Press.asm',
