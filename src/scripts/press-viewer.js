@@ -148,7 +148,7 @@ class PressViewer{
 }
 
 function populateParts(){const v=viewers[0];$('part-select').replaceChildren(new Option('All components',''));v.items.forEach(i=>$('part-select').add(new Option(`${String(i.index+1).padStart(2,'0')} · ${friendly(i.occ.name)}`,String(i.index))));$('isolate').checked=false;$('part-hint').textContent='';}
-function readout(id){if(id==='compound')return`${(163.537420985*progress).toFixed(1)} mm plate drop`;if(id==='geared')return`${(400*progress).toFixed(1)} mm · ${(200*progress).toFixed(1)} turns`;if(id==='twist'&&loadingFruit)return 'Lid removed · load berries';if(id==='twist')return`${(24*progress).toFixed(1)} mm · ${(4*progress).toFixed(2)} turns`;return`${(75*(1-progress)).toFixed(1)}° hinge opening`;}
+function readout(id){if(id==='hybrid-pedestal')return`${(163.537420985*progress).toFixed(1)} mm plate drop`;if(id==='hybrid-geared-jar')return`${(74*progress).toFixed(1)} mm · ${(148*progress).toFixed(1)} turns`;if(id==='compound')return`${(163.537420985*progress).toFixed(1)} mm plate drop`;if(id==='geared')return`${(400*progress).toFixed(1)} mm · ${(200*progress).toFixed(1)} turns`;if(id==='twist'&&loadingFruit)return 'Lid removed · load berries';if(id==='twist')return`${(24*progress).toFixed(1)} mm · ${(4*progress).toFixed(2)} turns`;return`${(75*(1-progress)).toFixed(1)}° hinge opening`;}
 function update({layout=false,fit=false}={}){
   $('state-loading').setAttribute('aria-pressed',String(loadingFruit));
   $('motion').value=String(Math.round(progress*1000));$('motion-value').textContent=`${Math.round(progress*100)}%`;$('state-readout').textContent=readout(activeId);$('explode').value=String(Math.round(explosion*100));$('explode-value').textContent=`${Math.round(explosion*100)}%`;$('explode-toggle').setAttribute('aria-pressed',String(explosion>.5));$('explode-toggle').textContent=explosion>.5?'Reassemble':'Explode';
@@ -159,6 +159,7 @@ function choose(id){
   const d=designs.find(d=>d.id===id);if(!d)return;activeId=id;pause();tween=null;loadingFruit=false;progress=0;explosion=0;inside=false;$('inside').checked=false;$('isolate').checked=false;
   document.querySelectorAll('[data-model]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.model===id)));$('design-panel').setAttribute('aria-labelledby',`tab-${id}`);document.querySelector('[data-stage-name]').textContent=d.name;$('stage-owner').textContent=d.owner;
   $('state-loading').hidden=id!=='twist';$('loading-figure').hidden=id!=='twist';$('model-stats').textContent=`${d.parts} unique parts · ${d.occurrences} components`;$('active-download').href=`${root}downloads/${d.download}`;$('part-hint').textContent='';$('part-select').replaceChildren(new Option('Loading…',''));
+  $('state-open').textContent=d.openLabel||'Open';
   const fallback=$('stage-primary').querySelector('.fallback');fallback.src=`${root}${d.preview}`;fallback.alt=`${d.name} in Solid Edge`;
   $('capture-name').textContent=d.name;$('sketch-figure').hidden=!d.sketch;if(d.sketch){$('sketch-image').src=`${root}${d.sketch}`;$('sketch-image').alt=`Original ${d.name} sketch`;$('sketch-link').href=`${root}${d.sketch}`;}
   $('cad-open').src=`${root}${id}/solid-edge-open.webp`;$('cad-open').alt=`${d.name} open in Solid Edge`;$('cad-open-link').href=$('cad-open').src;
@@ -188,4 +189,4 @@ $('compare-model').addEventListener('change',e=>viewers[1]?.load(e.target.value)
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
 let last=performance.now();function animate(now){if(destroyed)return;const dt=Math.min((now-last)/1000,.05);last=now;if(tween){const t=Math.min((now-tween.start)/tween.duration,1),ease=t*t*(3-2*t);explosion=tween.from+(tween.to-tween.from)*ease;update({fit:true});if(t===1)tween=null;}if(playing&&viewers[0]?.data){progress+=direction*dt/(activeId==='geared'?24:7);if(progress>=1){progress=1;direction=-1;}if(progress<=0){progress=0;direction=1;}update();}viewers.forEach(v=>v.tick());requestAnimationFrame(animate);}
 window.addEventListener('pagehide',()=>{destroyed=true;viewers.forEach(v=>v.dispose());});
-const requested=new URLSearchParams(location.search).get('design');choose(designs.some(d=>d.id===requested)?requested:'compound');requestAnimationFrame(animate);
+const requested=new URLSearchParams(location.search).get('design');choose(designs.some(d=>d.id===requested)?requested:designs[0].id);requestAnimationFrame(animate);
