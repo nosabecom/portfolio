@@ -11,6 +11,44 @@ the static site in `dist/`; `pnpm preview` serves that build locally.
 Run `pnpm check` for Astro and TypeScript diagnostics. Commit `pnpm-lock.yaml`
 with dependency changes; pnpm is the package manager for this repository.
 
+## University of Regina washroom finder
+
+`/ureginabathroom` compares nine researched washroom options using Fall 2026 and
+Winter 2027 classroom changeovers. It has a date/time selector, a building filter,
+and switches for calendar buildings, optional IEEE lounge visits, and private
+washrooms. The schedule snapshot was checked on October 16, 2026; it does not
+refresh automatically. Class changeovers do not measure washroom occupancy.
+
+The standalone Astro page is `src/pages/ureginabathroom/index.astro`. It contains
+public campus research only, with no personal calendar, account connection,
+analytics, or upload endpoint. Calendar JSON import and filter preferences stay in
+the visitor's browser storage. Removing the local calendar clears those events.
+Calendar data does not sync across devices.
+
+Imports accept an array, or an object with an `events` array, using this shape:
+
+```json
+{
+  "events": [
+    {
+      "title": "Campus visit",
+      "location": "Education Building",
+      "building": "ED",
+      "date": "2026-10-23",
+      "start": "13:00",
+      "end": "14:00",
+      "optional": false
+    }
+  ]
+}
+```
+
+Dates must be September 2026 through April 2027, times use 24-hour `HH:MM`, and
+each event must fit within one day. Recognized building codes are ED (including
+EA), RI, CL, LB, CW, LY, LC, CM, CK, and RC. Omit `building` to infer it from the
+location. Events without a recognizable campus building still appear in that
+day's calendar and conflict check, but cannot select a building.
+
 Vercel Web Analytics and Speed Insights use their Astro components in the shared
 layout, including client-side page transitions. Enable both in the Vercel project's
 dashboard and redeploy to collect data. Their collection endpoints are provided by
