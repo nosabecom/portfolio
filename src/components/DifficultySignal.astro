@@ -1,0 +1,9 @@
+---
+interface Props { level: number; }
+const { level } = Astro.props;
+const labels = ['Easiest', 'Moderate', 'Moderate–high', 'Hardest'];
+---
+<span class="difficulty-signal" data-level={level}>
+  <span class="signal-bars" aria-hidden="true">{[1, 2, 3, 4].map(bar => <span class:list={['signal-bar', { filled: bar <= level }]} />)}</span>
+  <span class="signal-label">{labels[level - 1]}</span>
+</span>
