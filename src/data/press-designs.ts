@@ -45,12 +45,12 @@ export const designs = [
     id: 'twist', number: '03', owner: 'Lyle', name: 'Screw-down lid juicer', short: 'Screw-down lid',
     modelingLevel: 'Moderate overall',
     modelingNotes: [
-      'With only four components, this has the smallest assembly. Revolved profiles suit the container, collar and strainer, and the pressing face belongs to the lid. Representing the strainer as a perforated bowl keeps it much easier to model than individual mesh wires.',
+      'With only four components, this has the smallest assembly. With the lid removed, the sloping side chute feeds berries into the strainer; juice drains through the strainer into the lower container. Revolved profiles suit the container, feed collar and strainer, and the pressing face belongs to the lid. Representing the strainer as a perforated bowl keeps it much easier to model than individual mesh wires.',
       'The mating helical threads are the difficult part. Their lead, entry relief and clearances must match, and the removable joints and strainer keys need careful sizing. It has fewer assembly relationships than either larger press, but more demanding individual features than its part count suggests.',
     ],
     mechanism: 'Twisting lid → descending pressing face', parts: 4, occurrences: 4, relationships: 6,
     difficulty: 'Fewest parts', emphasis: 'Compact assembly. Threads need care.',
-    description: 'Four detachable components: container, chute collar, fixed strainer and pressing lid. The confirmed screw-down interpretation turns the lid and its integral pressing face together.',
+    description: 'Four detachable components: container, berry-feed collar, fixed strainer and pressing lid. The side chute is a fruit inlet; juice collects in the lower container. The confirmed screw-down interpretation turns the lid and its integral pressing face together.',
     motion: 'Four lid turns produce 24 mm of downward travel. The strainer stays fixed while the lid rotates and descends at 6 mm per turn.',
     features: ['Revolve', 'Helical thread', 'Bayonet lugs', 'Screw coupling'],
     challenge: 'Four parts does not mean four easy features. Mating threads, entry relief and removable joints need careful clearances.',
@@ -59,7 +59,7 @@ export const designs = [
     checks: 'All 4 Ordered parts and 6 assembly relationships verified; 17 quarter-turn positions passed native interference checks.',
     assumptions: '110 mm container body diameter; 120 mm collar diameter; 43 mm strainer outer radius; 6 mm lead. Woven mesh is represented by a perforated bowl. Bayonet lugs and anti-rotation keys are added joint details.',
     preview: 'twist/preview.webp', sketch: 'twist/sketch.webp',
-    download: 'Twist_Lid_Juicer_Solid_Edge.zip', file: 'Twist_Lid_Juicer.asm',
+    download: 'Twist_Lid_Juicer_Solid_Edge.zip', file: 'Twist_Lid_Juicer_Revised.asm',
     shapeWork: 'Moderate–high', assemblyWork: 'Low–moderate', moving: 'One integral screw-down lid and pressing face',
   },
   {

@@ -5,7 +5,7 @@ import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 const designs=JSON.parse(document.getElementById('design-data').textContent);
 const $=id=>document.getElementById(id), root='/engineering-100/', cache=new Map(), viewers=[];
 const vec=()=>new THREE.Vector3(), zAxis=new THREE.Vector3(0,0,1);
-let activeId='compound',progress=0,explosion=0,playing=false,direction=1,inside=false,comparison=false,tween=null,destroyed=false;
+let activeId='compound',progress=0,explosion=0,playing=false,direction=1,inside=false,comparison=false,tween=null,destroyed=false,loadingFruit=false;
 const corners=box=>[...Array(8)].map((_,i)=>new THREE.Vector3(i&1?box.max.x:box.min.x,i&2?box.max.y:box.min.y,i&4?box.max.z:box.min.z));
 const friendly=name=>name.replace(/\.par:\d+$/i,'').replace(/^\d+_/,'').replaceAll('_',' ');
 async function fetchOK(url){const r=await fetch(url);if(!r.ok)throw new Error(`${r.status}: ${url}`);return r;}
@@ -85,7 +85,7 @@ class PressViewer{
     if(this.data){this.layout();this.applyPose();this.fit();}this.dirty=true;
   }
   setView(view){
-    this.view=view;const d=view==='front'?new THREE.Vector3(0,-1,0):view==='top'?new THREE.Vector3(0,-.0001,1):new THREE.Vector3(1.1,-1.8,1.05);
+    this.view=view;const d=view==='front'?new THREE.Vector3(0,-1,0):view==='top'?new THREE.Vector3(0,-.0001,1):loadingFruit&&this.id==='twist'?new THREE.Vector3(.8,-1.8,2.4):new THREE.Vector3(1.1,-1.8,1.05);
     this.controls.target.set(0,0,0);this.camera.position.copy(d.normalize().multiplyScalar(10));this.camera.zoom=1;this.controls.update();this.camera.updateMatrixWorld(true);
     if(this.data){this.layout();this.applyPose();this.fit();}this.dirty=true;
   }
@@ -94,6 +94,7 @@ class PressViewer{
     this.items.forEach(item=>{
       const a=this.data.transforms[lo][item.index],b=this.data.transforms[hi][item.index];item.mesh.position.copy(a.position).lerp(b.position,f);item.mesh.scale.copy(a.scale);
       if(Math.abs(item.occ.spin)>.01){const angle=item.occ.spin*progress,c=item.occ.spinCenter;if(c){const first=this.data.transforms[0][item.index].position,x=first.x-c[0],y=first.y-c[1];item.mesh.position.x=c[0]+x*Math.cos(angle)-y*Math.sin(angle);item.mesh.position.y=c[1]+x*Math.sin(angle)+y*Math.cos(angle);}item.mesh.quaternion.setFromAxisAngle(zAxis,angle).multiply(this.data.transforms[0][item.index].quaternion);}else item.mesh.quaternion.copy(a.quaternion).slerp(b.quaternion,f);
+      if(loadingFruit&&this.id==='twist'&&item.index===3)item.mesh.position.add(new THREE.Vector3(.11,.015,.11));
     });this.group.updateMatrixWorld(true);this.camera.updateMatrixWorld(true);
   }
   projectBox(box,matrix){
@@ -117,12 +118,12 @@ class PressViewer{
       const m=item.mesh.material;m.opacity=opacity;m.transparent=opacity<.99;m.depthWrite=opacity>.85;m.color.copy(selected?new THREE.Color(0xc9e1a5):item.original);m.emissive.setHex(selected?0x18230c:0);item.mesh.renderOrder=opacity<.99?1:0;
     });this.group.updateMatrixWorld(true);this.grid.visible=explosion<.05;
     if(this.id&&this.stage.id==='stage-secondary')this.stage.querySelector('.secondary-readout').textContent=readout(this.id);
-    this.stage.dataset.progress=progress.toFixed(3);this.stage.dataset.explosion=explosion.toFixed(3);this.dirty=true;
+    this.stage.dataset.progress=progress.toFixed(3);this.stage.dataset.explosion=explosion.toFixed(3);this.stage.dataset.loadingFruit=String(loadingFruit&&this.id==='twist');this.dirty=true;
   }
   fit(){
     if(!this.data||!this.aspect)return;this.group.updateMatrixWorld(true);this.camera.updateMatrixWorld(true);
     const bounds=new THREE.Box3();
-    if(explosion<.001&&!this.isolate)bounds.copy(this.projectBox(this.envelope));else this.items.filter(i=>i.mesh.visible).forEach(i=>bounds.union(this.itemBox(i)));
+    if(explosion<.001&&!this.isolate&&!(loadingFruit&&this.id==='twist'))bounds.copy(this.projectBox(this.envelope));else this.items.filter(i=>i.mesh.visible).forEach(i=>bounds.union(this.itemBox(i)));
     if(bounds.isEmpty())return;
     const cx=(bounds.min.x+bounds.max.x)/2,cy=(bounds.min.y+bounds.max.y)/2;
     const shift=new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld,0).multiplyScalar(cx).addScaledVector(new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld,1),cy);
@@ -147,16 +148,17 @@ class PressViewer{
 }
 
 function populateParts(){const v=viewers[0];$('part-select').replaceChildren(new Option('All components',''));v.items.forEach(i=>$('part-select').add(new Option(`${String(i.index+1).padStart(2,'0')} · ${friendly(i.occ.name)}`,String(i.index))));$('isolate').checked=false;$('part-hint').textContent='';}
-function readout(id){if(id==='compound')return`${(163.537420985*progress).toFixed(1)} mm plate drop`;if(id==='geared')return`${(400*progress).toFixed(1)} mm · ${(200*progress).toFixed(1)} turns`;if(id==='twist')return`${(24*progress).toFixed(1)} mm · ${(4*progress).toFixed(2)} turns`;return`${(75*(1-progress)).toFixed(1)}° hinge opening`;}
+function readout(id){if(id==='compound')return`${(163.537420985*progress).toFixed(1)} mm plate drop`;if(id==='geared')return`${(400*progress).toFixed(1)} mm · ${(200*progress).toFixed(1)} turns`;if(id==='twist'&&loadingFruit)return 'Lid removed · load berries';if(id==='twist')return`${(24*progress).toFixed(1)} mm · ${(4*progress).toFixed(2)} turns`;return`${(75*(1-progress)).toFixed(1)}° hinge opening`;}
 function update({layout=false,fit=false}={}){
+  $('state-loading').setAttribute('aria-pressed',String(loadingFruit));
   $('motion').value=String(Math.round(progress*1000));$('motion-value').textContent=`${Math.round(progress*100)}%`;$('state-readout').textContent=readout(activeId);$('explode').value=String(Math.round(explosion*100));$('explode-value').textContent=`${Math.round(explosion*100)}%`;$('explode-toggle').setAttribute('aria-pressed',String(explosion>.5));$('explode-toggle').textContent=explosion>.5?'Reassemble':'Explode';
   viewers.forEach(v=>{if(layout)v.layout();v.applyPose();if(fit)v.fit();});
 }
 function pause(){playing=false;$('play').setAttribute('aria-pressed','false');$('play').textContent='▶ Play';}
 function choose(id){
-  const d=designs.find(d=>d.id===id);if(!d)return;activeId=id;pause();tween=null;progress=0;explosion=0;inside=false;$('inside').checked=false;$('isolate').checked=false;
+  const d=designs.find(d=>d.id===id);if(!d)return;activeId=id;pause();tween=null;loadingFruit=false;progress=0;explosion=0;inside=false;$('inside').checked=false;$('isolate').checked=false;
   document.querySelectorAll('[data-model]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.model===id)));$('design-panel').setAttribute('aria-labelledby',`tab-${id}`);document.querySelector('[data-stage-name]').textContent=d.name;$('stage-owner').textContent=d.owner;
-  $('model-stats').textContent=`${d.parts} unique parts · ${d.occurrences} components`;$('active-download').href=`${root}downloads/${d.download}`;$('part-hint').textContent='';$('part-select').replaceChildren(new Option('Loading…',''));
+  $('state-loading').hidden=id!=='twist';$('loading-figure').hidden=id!=='twist';$('model-stats').textContent=`${d.parts} unique parts · ${d.occurrences} components`;$('active-download').href=`${root}downloads/${d.download}`;$('part-hint').textContent='';$('part-select').replaceChildren(new Option('Loading…',''));
   const fallback=$('stage-primary').querySelector('.fallback');fallback.src=`${root}${d.preview}`;fallback.alt=`${d.name} in Solid Edge`;
   $('capture-name').textContent=d.name;$('sketch-figure').hidden=!d.sketch;if(d.sketch){$('sketch-image').src=`${root}${d.sketch}`;$('sketch-image').alt=`Original ${d.name} sketch`;$('sketch-link').href=`${root}${d.sketch}`;}
   $('cad-open').src=`${root}${id}/solid-edge-open.webp`;$('cad-open').alt=`${d.name} open in Solid Edge`;$('cad-open-link').href=$('cad-open').src;
@@ -170,16 +172,17 @@ document.querySelector('.design-tabs').addEventListener('keydown',e=>{if(!['Arro
 document.querySelectorAll('[data-explore]').forEach(b=>b.addEventListener('click',()=>{choose(b.dataset.explore);$('explore').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}));
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{viewers.forEach(v=>v.setView(b.dataset.view));setCameraButtons(b.dataset.view);}));
 $('fit').addEventListener('click',()=>viewers.forEach(v=>{v.layout();v.applyPose();v.fit();}));
-$('motion').addEventListener('input',e=>{pause();tween=null;progress=Number(e.target.value)/1000;update({layout:explosion>0,fit:explosion>0});});
-$('state-open').addEventListener('click',()=>{pause();progress=0;update({layout:explosion>0,fit:explosion>0});});
-$('state-pressed').addEventListener('click',()=>{pause();progress=1;update({layout:explosion>0,fit:explosion>0});});
-$('play').addEventListener('click',()=>{if(playing)return pause();tween=null;explosion=0;viewers.forEach(v=>{v.selected='';v.isolate=false;});$('part-select').value='';$('isolate').checked=false;if(progress>=1)progress=0;direction=1;playing=true;$('play').setAttribute('aria-pressed','true');$('play').textContent='Ⅱ Pause';update({fit:true});});
-$('explode-toggle').addEventListener('click',()=>{pause();inside=false;$('inside').checked=false;viewers.forEach(v=>{v.selected='';v.isolate=false;v.layout();});$('part-select').value='';$('isolate').checked=false;$('part-hint').textContent='';tween={from:explosion,to:explosion>.5?0:1,start:performance.now(),duration:matchMedia('(prefers-reduced-motion: reduce)').matches?1:950};});
-$('explode').addEventListener('input',e=>{pause();tween=null;const next=Number(e.target.value)/100;if(explosion===0&&next>0)viewers.forEach(v=>v.layout());explosion=next;update({fit:true});});
+$('motion').addEventListener('input',e=>{pause();tween=null;const wasLoading=loadingFruit;loadingFruit=false;progress=Number(e.target.value)/1000;update({layout:explosion>0,fit:explosion>0||wasLoading});});
+$('state-open').addEventListener('click',()=>{pause();const wasLoading=loadingFruit;loadingFruit=false;progress=0;update({layout:explosion>0,fit:explosion>0||wasLoading});});
+$('state-pressed').addEventListener('click',()=>{pause();const wasLoading=loadingFruit;loadingFruit=false;progress=1;update({layout:explosion>0,fit:explosion>0||wasLoading});});
+$('state-loading').addEventListener('click',()=>{pause();tween=null;loadingFruit=!loadingFruit;progress=0;explosion=0;inside=false;$('inside').checked=false;$('isolate').checked=false;$('part-select').value='';$('part-hint').textContent='';viewers.forEach(v=>{v.selected='';v.isolate=false;v.setView('iso');});setCameraButtons('iso');update({layout:true,fit:true});});
+$('play').addEventListener('click',()=>{if(playing)return pause();tween=null;loadingFruit=false;explosion=0;viewers.forEach(v=>{v.selected='';v.isolate=false;});$('part-select').value='';$('isolate').checked=false;if(progress>=1)progress=0;direction=1;playing=true;$('play').setAttribute('aria-pressed','true');$('play').textContent='Ⅱ Pause';update({fit:true});});
+$('explode-toggle').addEventListener('click',()=>{pause();loadingFruit=false;inside=false;$('inside').checked=false;viewers.forEach(v=>{v.selected='';v.isolate=false;v.layout();});$('part-select').value='';$('isolate').checked=false;$('part-hint').textContent='';tween={from:explosion,to:explosion>.5?0:1,start:performance.now(),duration:matchMedia('(prefers-reduced-motion: reduce)').matches?1:950};});
+$('explode').addEventListener('input',e=>{pause();tween=null;loadingFruit=false;const next=Number(e.target.value)/100;if(explosion===0&&next>0)viewers.forEach(v=>v.layout());explosion=next;update({fit:true});});
 $('inside').addEventListener('change',e=>{inside=e.target.checked;update();});
 $('part-select').addEventListener('change',e=>{const v=viewers[0];if(!v)return;v.selected=e.target.value;const item=v.items.find(i=>String(i.index)===v.selected);$('part-hint').textContent=item?friendly(item.occ.name):'';update({fit:v.isolate});});
 $('isolate').addEventListener('change',e=>{if(!viewers[0])return;viewers[0].isolate=e.target.checked;update({fit:true});});
-$('reset').addEventListener('click',()=>{pause();tween=null;progress=0;explosion=0;inside=false;$('inside').checked=false;$('isolate').checked=false;$('part-select').value='';$('part-hint').textContent='';viewers.forEach(v=>{v.selected='';v.isolate=false;v.setView('iso');});setCameraButtons('iso');update({fit:true});});
+$('reset').addEventListener('click',()=>{pause();tween=null;loadingFruit=false;progress=0;explosion=0;inside=false;$('inside').checked=false;$('isolate').checked=false;$('part-select').value='';$('part-hint').textContent='';viewers.forEach(v=>{v.selected='';v.isolate=false;v.setView('iso');});setCameraButtons('iso');update({fit:true});});
 $('compare-toggle').addEventListener('click',()=>{comparison=!comparison;$('compare-toggle').setAttribute('aria-pressed',String(comparison));$('compare-toggle').textContent=comparison?'− Close comparison':'＋ Compare';$('stage-secondary').hidden=!comparison;$('stages').classList.toggle('comparing',comparison);if(comparison){if(!viewers[1]){try{viewers.push(new PressViewer($('stage-secondary')));}catch(e){console.error(e);$('stage-secondary').querySelector('.loading').textContent='Second viewer unavailable.';}}if(viewers[1]?.id!==$('compare-model').value)viewers[1]?.load($('compare-model').value);}requestAnimationFrame(()=>viewers.forEach(v=>v.resize()));});
 $('compare-model').addEventListener('change',e=>viewers[1]?.load(e.target.value));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
