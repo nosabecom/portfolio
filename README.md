@@ -95,7 +95,7 @@ then appears, followed by the avatar, intro line, navigation, and corner control
 Add `?intro-demo` for a replay button in the app. The control only appears with
 that query parameter.
 The animation runs when entering the homepage; reading pages keep their usual
-background. Skip intro, keyboard focus on the profile, map interaction, resizing,
+background. Keyboard focus on the profile, map interaction, resizing,
 and switching tabs finish the opening immediately. Reduced motion shows the
 finished page directly. With JavaScript disabled, profile content remains visible.
 The intro reuses the cached map and a transparent cache of its pluses, crosses,

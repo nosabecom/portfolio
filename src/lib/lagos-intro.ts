@@ -79,7 +79,6 @@ export function mountLagosIntro(
   if (demo) demo.hidden = !params.has('intro-demo');
   root.addEventListener('click', event => {
     const button = (event.target as Element).closest<HTMLButtonElement>('button');
-    if (button?.hasAttribute('data-intro-skip')) finish();
     if (button?.hasAttribute('data-intro-replay')) play();
   }, { signal: events.signal });
   // Focusing the content or drawing on the map immediately completes the intro.
