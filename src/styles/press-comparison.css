@@ -25,3 +25,5 @@
   .signal-bar.filled{background:var(--signal)}
   .signal-label{font-size:11px;line-height:1.5;color:var(--signal)}
 .mergers-page .design-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.revision-link{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 18px;margin:0 0 18px;border:1px solid #5e7765;border-radius:6px;background:#1c2c27;color:var(--accent);font-size:13px;text-decoration:none}
+.revision-link:hover{background:#263b31}

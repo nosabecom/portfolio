@@ -1,14 +1,15 @@
 export const mergedDesigns = [
   {
     id: 'hybrid-pedestal', number: '01', owner: 'Arslan + Althea',
-    name: 'Compound bowl press', parts: 16, occurrences: 21,
+    revision: 'Rev 3', removableBowl: true,
+    name: 'Suspended bowl press', parts: 14, occurrences: 19,
     modelingLevel: 'Moderate–high', shapeWork: 'Moderate', assemblyWork: 'Moderate–high',
     modelingNotes: [
-      'Arslan’s hemispherical perforated bowl, collection cone and juice spout sit beneath Althea’s compound lever, twin links and guided vertical ram. A matching convex head presses straight into the bowl. The bowl is scaled to 200 mm outside diameter; the head has 163.5 mm of vertical travel.',
-      'The bowl and collector use revolved sections; drainage holes add feature work. The harder step is placing the bowl and matching head so the linkage clears the guide and bowl throughout its stroke. The downloads include editable source parts and grounded open/pressed assemblies. Native moving-joint relationships remain to be added.',
+      'The lever and guided head hang above a large removable bowl. A perforated strainer sits on the bowl rim, so juice drains straight down. The 320 mm collection bowl has two grab handles and lifts out with the strainer for emptying and cleaning.',
+      'Moderate–high: revolve the curved bowl, add the handles and strainer flange, then align the linkage and vertical ram. The main checks are head clearance through the 163 mm stroke and enough room to lift the bowl before pulling it forward. Native Solid Edge motion is included.',
     ],
     preview: 'hybrid-pedestal/preview.webp', sketch: '',
-    download: 'Pedestal_Compound_Press_Solid_Edge.zip', file: 'Pedestal_Compound_Press.asm',
+    download: 'Arslan_Althea_Removable_Bowl_Rev3.zip', file: 'Suspended_Lever_Bowl_Press_Rev3.asm',
   },
   {
     id: 'hybrid-geared-jar', number: '02', owner: 'Nosa + Lyle',
