@@ -1,15 +1,15 @@
 export const mergedDesigns = [
   {
     id: 'hybrid-pedestal', number: '01', owner: 'Arslan + Althea',
-    revision: 'Rev 3', removableBowl: true,
-    name: 'Suspended bowl press', parts: 14, occurrences: 19,
+    revision: 'Rev 4', removableBowl: true,
+    name: 'Suspended basket press', parts: 15, occurrences: 20,
     modelingLevel: 'Moderate–high', shapeWork: 'Moderate', assemblyWork: 'Moderate–high',
     modelingNotes: [
-      'The lever and guided head hang above a large removable bowl. A perforated strainer sits on the bowl rim, so juice drains straight down. The 320 mm collection bowl has two grab handles and lifts out with the strainer for emptying and cleaning.',
-      'Moderate–high: revolve the curved bowl, add the handles and strainer flange, then align the linkage and vertical ram. The main checks are head clearance through the 163 mm stroke and enough room to lift the bowl before pulling it forward. Native Solid Edge motion is included.',
+      'The head presses into a perforated fruit basket held up by the rear frame. Juice falls straight down into the separate 320 mm collection bowl underneath. Pull out the lower bowl by its handles; the basket stays suspended.',
+      'Moderate–high: revolve the bowl and basket, model the fixed support arm and locating ring, then align the lever, links and ram. Check the 163 mm pressing stroke and bowl removal clearance. Viewer motion uses solved Solid Edge positions.',
     ],
     preview: 'hybrid-pedestal/preview.webp', sketch: '',
-    download: 'Arslan_Althea_Removable_Bowl_Rev3.zip', file: 'Suspended_Lever_Bowl_Press_Rev3.asm',
+    download: 'Arslan_Althea_Suspended_Strainer_Rev4.zip', file: 'Suspended_Strainer_Bowl_Press_Rev4.asm',
   },
   {
     id: 'hybrid-geared-jar', number: '02', owner: 'Nosa + Lyle',
