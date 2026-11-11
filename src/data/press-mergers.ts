@@ -1,15 +1,15 @@
 export const mergedDesigns = [
   {
     id: 'hybrid-pedestal', number: '01', owner: 'Arslan + Althea',
-    revision: 'Rev 4', removableBowl: true,
+    revision: 'Rev 5', removableBowl: true,
     name: 'Suspended basket press', parts: 15, occurrences: 20,
     modelingLevel: 'Moderate–high', shapeWork: 'Moderate', assemblyWork: 'Moderate–high',
     modelingNotes: [
-      'The head presses into a perforated fruit basket held up by the rear frame. Juice falls straight down into the separate 320 mm collection bowl underneath. Pull out the lower bowl by its handles; the basket stays suspended.',
+      'The head presses into a frame-supported fruit basket with a narrow rim. The wide annulus is trimmed to a 240 mm basket flange and 252 mm holder. Juice drops into the separate 320 mm bowl below, which pulls out by its handles.',
       'Moderate–high: revolve the bowl and basket, model the fixed support arm and locating ring, then align the lever, links and ram. Check the 163 mm pressing stroke and bowl removal clearance. Viewer motion uses solved Solid Edge positions.',
     ],
     preview: 'hybrid-pedestal/preview.webp', sketch: '',
-    download: 'Arslan_Althea_Suspended_Strainer_Rev4.zip', file: 'Suspended_Strainer_Bowl_Press_Rev4.asm',
+    download: 'Arslan_Althea_Compact_Rim_Rev5.zip', file: 'Compact_Rim_Bowl_Press_Rev5.asm',
   },
   {
     id: 'hybrid-geared-jar', number: '02', owner: 'Nosa + Lyle',
